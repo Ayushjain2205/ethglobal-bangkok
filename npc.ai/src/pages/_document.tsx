@@ -10,6 +10,14 @@ export default function Document() {
           href="https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@100;300;400;900&display=swap"
           rel="stylesheet"
         ></link>
+        <link
+          href="https://unpkg.com/nes.css@latest/css/nes.min.css"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css?family=Press+Start+2P"
+          rel="stylesheet"
+        />
       </Head>
       <body className="antialiased">
         <Main />
