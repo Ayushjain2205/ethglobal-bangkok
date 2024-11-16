@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { supabase } from "@/lib/supabase";
-import type { NPC } from "@/lib/supabase";
+import type { NPC } from "@/types/npc";
 import Link from "next/link";
 
 const AllNPCs = () => {
@@ -49,9 +49,14 @@ const AllNPCs = () => {
             <div key={npc.id} className="nes-container with-title">
               <p className="title">{npc.name}</p>
               <div className="space-y-2">
+                <img
+                  src={npc.avatar}
+                  className="h-[100px] rounded-full"
+                  alt=""
+                />
                 <p className="text-sm">{npc.background.substring(0, 100)}...</p>
                 <div className="flex flex-wrap gap-2">
-                  {npc.coreValues.map((value) => (
+                  {npc.core_values?.map((value) => (
                     <span key={value} className="nes-badge">
                       <span className="is-primary">{value}</span>
                     </span>
