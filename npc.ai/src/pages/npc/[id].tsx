@@ -13,7 +13,27 @@ import {
   Brain,
   BotIcon as Robot,
   Dumbbell,
+  ArrowRightLeft,
+  ArrowUpDown,
+  PlusCircle,
+  FileCode,
+  Palette,
 } from "lucide-react";
+
+interface Transaction {
+  id: string;
+  type:
+    | "send"
+    | "receive"
+    | "mintNFT"
+    | "mintToken"
+    | "smartContract"
+    | "createToken"
+    | "createNFT";
+  amount?: number;
+  details: string;
+  timestamp: string;
+}
 
 const PersonalityTrait = ({
   value,
@@ -41,21 +61,115 @@ const PersonalityTrait = ({
   </div>
 );
 
+const OnChainActivity = ({ transactions }: { transactions: Transaction[] }) => {
+  const getIcon = (type: Transaction["type"]) => {
+    switch (type) {
+      case "send":
+        return (
+          <ArrowUpDown className="inline-block mr-2 text-red-500" size={16} />
+        );
+      case "receive":
+        return (
+          <ArrowRightLeft
+            className="inline-block mr-2 text-green-500"
+            size={16}
+          />
+        );
+      case "mintNFT":
+        return (
+          <Palette className="inline-block mr-2 text-purple-500" size={16} />
+        );
+      case "mintToken":
+        return (
+          <Coins className="inline-block mr-2 text-yellow-500" size={16} />
+        );
+      case "smartContract":
+        return (
+          <FileCode className="inline-block mr-2 text-blue-500" size={16} />
+        );
+      case "createToken":
+        return (
+          <PlusCircle className="inline-block mr-2 text-green-500" size={16} />
+        );
+      case "createNFT":
+        return (
+          <ImageIcon className="inline-block mr-2 text-pink-500" size={16} />
+        );
+      default:
+        return null;
+    }
+  };
+
+  const getRelativeTime = (timestamp: string) => {
+    const now = new Date();
+    const txDate = new Date(timestamp);
+    const diffInSeconds = Math.floor((now.getTime() - txDate.getTime()) / 1000);
+
+    if (diffInSeconds < 180) return "Few mins ago";
+    if (diffInSeconds < 3600)
+      return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 2592000)
+      return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    return `${Math.floor(diffInSeconds / 2592000)} months ago`;
+  };
+
+  return (
+    <div className="nes-container is-dark with-title">
+      <p className="title">On-Chain Activity</p>
+      <div
+        className="overflow-y-auto border border-gray-700"
+        style={{ maxHeight: "300px" }}
+      >
+        <table className="nes-table is-bordered is-dark w-full">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Details</th>
+              <th>Amount</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {transactions.map((tx) => (
+              <tr key={tx.id}>
+                <td>
+                  {getIcon(tx.type)}
+                  {tx.type}
+                </td>
+                <td>{tx.details}</td>
+                <td>
+                  {tx.amount !== undefined
+                    ? `${tx.amount.toFixed(4)} ETH`
+                    : "-"}
+                </td>
+                <td>{getRelativeTime(tx.timestamp)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
 export default function NPCDetail() {
   const params = useParams();
   const { id } = params;
   const [npc, setNpc] = useState<NPC | null>(null);
   const [loading, setLoading] = useState(true);
   const [thoughts, setThoughts] = useState<string[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
     if (id) {
       fetchNPCDetails();
+      fetchOnChainActivity();
     }
   }, [id]);
 
   useEffect(() => {
-    // Generate initial thoughts for the past 2 hours
     const initialThoughts = generateInitialThoughts();
     setThoughts(initialThoughts);
 
@@ -66,7 +180,7 @@ export default function NPCDetail() {
         ...prevThoughts,
         `[${timestamp}] ${newThought}`,
       ]);
-    }, 60000); // Update every 60000 milliseconds (1 minute)
+    }, 60000);
 
     return () => clearInterval(interval);
   }, []);
@@ -86,6 +200,116 @@ export default function NPCDetail() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchOnChainActivity = async () => {
+    // This is a mock function. In a real application, you would fetch this data from a blockchain explorer API
+    const mockTransactions: Transaction[] = [
+      {
+        id: "1",
+        type: "send",
+        amount: 0.1,
+        details: "Sent to 0x1234...5678",
+        timestamp: "2024-11-17T10:30:00Z",
+      },
+      {
+        id: "2",
+        type: "receive",
+        amount: 0.05,
+        details: "Received from 0x8765...4321",
+        timestamp: "2024-11-17T15:45:00Z",
+      },
+      {
+        id: "3",
+        type: "mintNFT",
+        details: "Minted NFT #1234",
+        timestamp: "2024-11-16T09:20:00Z",
+      },
+      {
+        id: "4",
+        type: "smartContract",
+        details: "Interacted with DEX contract",
+        timestamp: "2024-11-16T18:00:00Z",
+      },
+      {
+        id: "5",
+        type: "createToken",
+        details: "Created ERC20 token $EXAMPLE",
+        timestamp: "2024-11-16T11:10:00Z",
+      },
+      {
+        id: "6",
+        type: "mintToken",
+        amount: 1000,
+        details: "Minted 1000 $EXAMPLE tokens",
+        timestamp: "2024-11-16T14:30:00Z",
+      },
+      {
+        id: "7",
+        type: "createNFT",
+        details: "Created new NFT collection",
+        timestamp: "2024-11-16T16:45:00Z",
+      },
+      {
+        id: "8",
+        type: "send",
+        amount: 0.2,
+        details: "Sent to 0xABCD...EFGH",
+        timestamp: "2024-11-17T08:15:00Z",
+      },
+      {
+        id: "9",
+        type: "receive",
+        amount: 0.15,
+        details: "Received from 0xIJKL...MNOP",
+        timestamp: "2024-11-17T12:00:00Z",
+      },
+      {
+        id: "10",
+        type: "smartContract",
+        details: "Interacted with Lending protocol",
+        timestamp: "2024-11-16T20:30:00Z",
+      },
+      {
+        id: "11",
+        type: "mintNFT",
+        details: "Minted NFT #5678",
+        timestamp: "2024-11-17T07:45:00Z",
+      },
+      {
+        id: "12",
+        type: "createToken",
+        details: "Created ERC20 token $SAMPLE",
+        timestamp: "2024-11-16T13:20:00Z",
+      },
+      {
+        id: "13",
+        type: "mintToken",
+        amount: 500,
+        details: "Minted 500 $SAMPLE tokens",
+        timestamp: "2024-11-16T17:10:00Z",
+      },
+      {
+        id: "14",
+        type: "send",
+        amount: 0.03,
+        details: "Sent to 0xQRST...UVWX",
+        timestamp: "2024-11-17T09:50:00Z",
+      },
+      {
+        id: "15",
+        type: "receive",
+        amount: 0.08,
+        details: "Received from 0xYZAB...CDEF",
+        timestamp: "2024-11-17T14:25:00Z",
+      },
+    ];
+    // Sort transactions chronologically, most recent first
+    mockTransactions.sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    setTransactions(mockTransactions);
   };
 
   const generateRandomThought = () => {
@@ -236,6 +460,11 @@ export default function NPCDetail() {
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* On-Chain Activity Section */}
+          <div className="mt-8">
+            <OnChainActivity transactions={transactions} />
           </div>
 
           {/* Terminal Section */}
