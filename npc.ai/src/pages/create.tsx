@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Layout from "@/components/Layout";
+import Image from "next/image";
 
 const CustomRange = ({
   value,
@@ -44,10 +45,10 @@ const CustomRange = ({
   }, [isDragging]);
 
   return (
-    <div className="mb-4">
+    <div className="mb-6">
       <label className="block mb-2">{label}</label>
       <div
-        className=" relative cursor-pointer"
+        className="relative cursor-pointer"
         ref={rangeRef}
         onMouseDown={handleMouseDown}
         onClick={handleMouseMove}
@@ -139,13 +140,41 @@ const NPCCreator = () => {
     });
   };
 
+  const autoPopulate = (field) => {
+    const populatedData = {
+      background:
+        "A mysterious figure with a hidden past, this NPC grew up in the shadowy alleys of a bustling cyberpunk metropolis. Their life changed when they discovered their innate ability to manipulate digital realities.",
+      appearance:
+        "Tall and lithe, with neon-blue hair and silver cybernetic eyes. Wears a sleek, black exosuit adorned with glowing circuit patterns. A holographic interface flickers around their left arm.",
+    };
+    setNpcData((prev) => ({
+      ...prev,
+      basicInfo: {
+        ...prev.basicInfo,
+        [field]: populatedData[field],
+      },
+    }));
+  };
+
   const renderStep = () => {
     switch (step) {
       case 1:
         return (
           <div className="nes-container with-title">
             <p className="title">Basic Information</p>
-            <div className="nes-field">
+            <div className="flex justify-center mb-6">
+              <div
+                className="nes-avatar is-large is-rounded"
+                style={{ width: "100px", height: "100px" }}
+              >
+                <img
+                  src="https://noun-api.com/beta/pfp"
+                  alt="NPC Avatar"
+                  className="rounded-full h-[10"
+                />
+              </div>
+            </div>
+            <div className="nes-field mb-6">
               <label htmlFor="name">NPC Name</label>
               <input
                 type="text"
@@ -156,8 +185,16 @@ const NPCCreator = () => {
                 onChange={(e) => handleInputChange(e, "basicInfo")}
               />
             </div>
-            <div className="nes-field">
-              <label htmlFor="background">Background Story</label>
+            <div className="nes-field mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <label htmlFor="background">Background Story</label>
+                <button
+                  className="nes-btn is-primary is-small"
+                  onClick={() => autoPopulate("background")}
+                >
+                  🔮
+                </button>
+              </div>
               <textarea
                 id="background"
                 name="background"
@@ -166,8 +203,16 @@ const NPCCreator = () => {
                 onChange={(e) => handleInputChange(e, "basicInfo")}
               ></textarea>
             </div>
-            <div className="nes-field">
-              <label htmlFor="appearance">Appearance Description</label>
+            <div className="nes-field mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <label htmlFor="appearance">Appearance Description</label>
+                <button
+                  className="nes-btn is-primary is-small"
+                  onClick={() => autoPopulate("appearance")}
+                >
+                  🔮
+                </button>
+              </div>
               <textarea
                 id="appearance"
                 name="appearance"
@@ -208,48 +253,48 @@ const NPCCreator = () => {
       case 3:
         return (
           <div className="nes-container with-title">
-            <p className="title">Core Values & Primary Aims</p>
-            <div className="mb-4">
-              <p>Core Values</p>
-              <div className="grid grid-cols-2 gap-2">
-                {predefinedValues.map((value) => (
-                  <button
-                    key={value.id}
-                    className={`nes-btn ${
-                      npcData.selectedValues.includes(value.id)
-                        ? "is-primary"
-                        : ""
-                    }`}
-                    onClick={() => toggleSelection(value, "values")}
-                  >
-                    {value.icon} {value.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p>Primary Aims</p>
-              <div className="grid grid-cols-2 gap-2">
-                {predefinedAims.map((aim) => (
-                  <button
-                    key={aim.id}
-                    className={`nes-btn ${
-                      npcData.selectedAims.includes(aim.id) ? "is-primary" : ""
-                    }`}
-                    onClick={() => toggleSelection(aim, "aims")}
-                  >
-                    {aim.icon} {aim.label}
-                  </button>
-                ))}
-              </div>
+            <p className="title">Core Values</p>
+            <div className="grid grid-cols-2 gap-4">
+              {predefinedValues.map((value) => (
+                <button
+                  key={value.id}
+                  className={`nes-btn ${
+                    npcData.selectedValues.includes(value.id)
+                      ? "is-primary"
+                      : ""
+                  }`}
+                  onClick={() => toggleSelection(value, "values")}
+                >
+                  {value.icon} {value.label}
+                </button>
+              ))}
             </div>
           </div>
         );
       case 4:
         return (
           <div className="nes-container with-title">
+            <p className="title">Primary Aims</p>
+            <div className="grid grid-cols-2 gap-4">
+              {predefinedAims.map((aim) => (
+                <button
+                  key={aim.id}
+                  className={`nes-btn ${
+                    npcData.selectedAims.includes(aim.id) ? "is-primary" : ""
+                  }`}
+                  onClick={() => toggleSelection(aim, "aims")}
+                >
+                  {aim.icon} {aim.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      case 5:
+        return (
+          <div className="nes-container with-title">
             <p className="title">Voice Settings</p>
-            <div className="nes-select">
+            <div className="nes-select mb-6">
               <select
                 name="type"
                 value={npcData.voice.type}
@@ -288,7 +333,7 @@ const NPCCreator = () => {
   };
 
   const handleNext = () => {
-    if (step < 4) setStep(step + 1);
+    if (step < 5) setStep(step + 1);
   };
 
   const handlePrev = () => {
@@ -311,7 +356,7 @@ const NPCCreator = () => {
               Previous
             </button>
           )}
-          {step < 4 ? (
+          {step < 5 ? (
             <button className="nes-btn is-primary" onClick={handleNext}>
               Next
             </button>
