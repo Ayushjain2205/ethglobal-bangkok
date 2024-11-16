@@ -1,24 +1,24 @@
 {
-  "name": "testing",
-  "background": "A mysterious figure with a hidden past, this NPC grew up in the shadowy alleys of a bustling cyberpunk metropolis. Their life changed when they discovered their innate ability to manipulate digital realities.",
-  "appearance": "adadad",
+  "name": "Botswald",
+  "background": "asd",
+  "appearance": "asd",
   "personality": {
-    "riskTolerance": 81,
-    "rationality": 38,
-    "autonomy": 78
+    "riskTolerance": 50,
+    "rationality": 50,
+    "autonomy": 50
   },
   "coreValues": [
-    "analytical",
-    "competitive"
+    "aggressive"
   ],
   "primaryAims": [
-    "community",
-    "profit"
+    "community"
   ],
   "voice": {
-    "type": "friendly",
+    "type": "",
     "sample": null
   },
   "walletAddress": "0x1234567890123456789012345678901234567890",
-  "transactionHash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+  "transactionHash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+  "wallet_address": "0x3B2faF9Aba59092375C55D835B312F1E0Bcec11e",
+  "wallet_id": "e36b8d83-833e-429c-a9bb-56b76e6ade4e"
 }
