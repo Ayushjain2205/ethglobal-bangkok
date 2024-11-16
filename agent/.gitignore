@@ -1,5 +1,0 @@
-.env
-*.env
-encrypted_seed.json
-wallet.json
-wallet_data.txt
