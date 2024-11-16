@@ -3,13 +3,54 @@ import React, { useState, useRef, useEffect } from "react";
 import Layout from "@/components/Layout";
 import Confetti from "react-confetti";
 import { supabase } from "@/lib/supabase";
+import { WalletInfo } from "@/types/npc";
+
+interface CustomRangeProps {
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+  max?: number;
+  label: string;
+  leftLabel: string;
+  rightLabel: string;
+}
+
+interface VoiceSample {
+  name: string;
+  [key: string]: any;
+}
+
+interface NPCDataState {
+  basicInfo: {
+    name: string;
+    background: string;
+    appearance: string;
+  };
+  personality: {
+    riskTolerance: number;
+    rationality: number;
+    autonomy: number;
+  };
+  selectedValues: string[];
+  selectedAims: string[];
+  voice: {
+    type: string;
+    sample: VoiceSample | null;
+  };
+}
+
+interface PredefinedItem {
+  id: string;
+  label: string;
+  icon: string;
+}
 
 const truncateAddress = (address: string) => {
   if (!address) return "";
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 };
 
-const CustomRange = ({
+const CustomRange: React.FC<CustomRangeProps> = ({
   value,
   onChange,
   min = 0,
@@ -19,15 +60,15 @@ const CustomRange = ({
   rightLabel,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const rangeRef = useRef(null);
+  const rangeRef = useRef<HTMLDivElement>(null);
 
-  const handleMouseDown = (e) => {
+  const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     handleMouseMove(e);
   };
 
-  const handleMouseMove = (e) => {
-    if (isDragging || e.type === "click") {
+  const handleMouseMove = (e: MouseEvent | React.MouseEvent) => {
+    if ((isDragging || e.type === "click") && rangeRef.current) {
       const rect = rangeRef.current.getBoundingClientRect();
       const x = Math.min(Math.max(0, e.clientX - rect.left), rect.width);
       const percent = x / rect.width;
@@ -74,7 +115,7 @@ const CustomRange = ({
   );
 };
 
-const NPCCreator = () => {
+const NPCCreator: React.FC = () => {
   const [step, setStep] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
   const [creationProgress, setCreationProgress] = useState(0);
@@ -82,7 +123,7 @@ const NPCCreator = () => {
   const [walletAddress, setWalletAddress] = useState("");
   const [transactionHash, setTransactionHash] = useState("");
   const [showConfetti, setShowConfetti] = useState(false);
-  const [npcData, setNpcData] = useState({
+  const [npcData, setNpcData] = useState<NPCDataState>({
     basicInfo: {
       name: "",
       background: "",
@@ -129,7 +170,12 @@ const NPCCreator = () => {
     { id: "community", label: "Community Building", icon: "👥" },
   ];
 
-  const handleInputChange = (e, section) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+    section: keyof NPCDataState
+  ) => {
     const { name, value } = e.target;
     setNpcData((prev) => ({
       ...prev,
@@ -140,7 +186,10 @@ const NPCCreator = () => {
     }));
   };
 
-  const handleSliderChange = (value, trait) => {
+  const handleSliderChange = (
+    value: number,
+    trait: keyof NPCDataState["personality"]
+  ) => {
     setNpcData((prev) => ({
       ...prev,
       personality: {
@@ -150,7 +199,7 @@ const NPCCreator = () => {
     }));
   };
 
-  const toggleSelection = (item, type) => {
+  const toggleSelection = (item: PredefinedItem, type: "values" | "aims") => {
     setNpcData((prev) => {
       const key = type === "values" ? "selectedValues" : "selectedAims";
       const updatedSelection = prev[key].includes(item.id)
@@ -160,7 +209,7 @@ const NPCCreator = () => {
     });
   };
 
-  const autoPopulate = (field) => {
+  const autoPopulate = (field: keyof NPCDataState["basicInfo"]) => {
     const populatedData = {
       background:
         "A mysterious figure with a hidden past, this NPC grew up in the shadowy alleys of a bustling cyberpunk metropolis. Their life changed when they discovered their innate ability to manipulate digital realities.",
@@ -171,19 +220,19 @@ const NPCCreator = () => {
       ...prev,
       basicInfo: {
         ...prev.basicInfo,
-        [field]: populatedData[field],
+        [field]: populatedData[field as keyof typeof populatedData] || "",
       },
     }));
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       setNpcData((prev) => ({
         ...prev,
         voice: {
           ...prev.voice,
-          sample: file,
+          sample: file as unknown as VoiceSample,
         },
       }));
     }
