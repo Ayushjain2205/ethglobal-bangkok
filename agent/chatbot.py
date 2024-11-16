@@ -10,6 +10,9 @@ from langgraph.prebuilt import create_react_agent
 from cdp_langchain.agent_toolkits import CdpToolkit
 from cdp_langchain.utils import CdpAgentkitWrapper
 import json
+from cdp_sdk import CoinbaseCloud
+from cdp_sdk.wallet import Wallet
+from cdp import Cdp
 
 # Load environment variables
 load_dotenv()
@@ -51,6 +54,80 @@ def save_npc_config(config: dict) -> bool:
     except Exception as e:
         print(f"Error saving NPC config: {e}")
         return False
+
+async def create_wallet() -> dict:
+    try:
+        print("Initializing CDP SDK...")
+        
+        # Configure CDP SDK with API credentials
+        api_key = os.getenv('CDP_API_KEY')
+        api_secret = os.getenv('CDP_API_SECRET')
+        network_id = os.getenv('CDP_NETWORK_ID', 'base-sepolia')
+        
+        if not api_key or not api_secret:
+            raise ValueError("CDP API credentials not found in environment variables")
+        
+        # Configure the SDK
+        Cdp.configure(api_key, api_secret)
+        print("CDP SDK configured successfully")
+        
+        # Create a wallet using the Wallet class
+        print("Creating new wallet...")
+        wallet = Wallet.create(network_id)  # Changed from Cdp.create_wallet to Wallet.create
+        
+        print(f"Wallet created successfully")
+        print(f"Address: {wallet.address}")
+        
+        return {
+            "status": "success",
+            "wallet_address": wallet.address,
+            "wallet_id": wallet.id if hasattr(wallet, 'id') else None
+        }
+    except Exception as e:
+        error_message = str(e)
+        print(f"Error creating wallet: {error_message}")
+        print(f"Error type: {type(e)}")
+        
+        if "API key" in error_message:
+            return {
+                "status": "error",
+                "message": "CDP API key configuration error. Please check your credentials."
+            }
+        elif "network" in error_message.lower():
+            return {
+                "status": "error",
+                "message": "Network connectivity issue. Please check your internet connection."
+            }
+        else:
+            return {
+                "status": "error",
+                "message": f"Unexpected error: {error_message}"
+            }
+
+@app.post("/create-wallet")
+async def create_new_wallet():
+    try:
+        print("Received wallet creation request")
+        wallet_data = await create_wallet()
+        print(f"Wallet creation result: {wallet_data['status']}")
+        
+        if wallet_data["status"] == "success":
+            return {
+                "status": "success",
+                "wallet_address": wallet_data["wallet_address"]
+            }
+        else:
+            raise HTTPException(
+                status_code=500, 
+                detail=wallet_data["message"]
+            )
+    except Exception as e:
+        error_message = str(e)
+        print(f"Error in create_new_wallet endpoint: {error_message}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create wallet: {error_message}"
+        )
 
 def initialize_agent():
     llm = ChatOpenAI(model="gpt-4")
