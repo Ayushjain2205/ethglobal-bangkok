@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useRef, useEffect } from "react";
 import Layout from "@/components/Layout";
 import Image from "next/image";
@@ -365,8 +364,8 @@ const NPCCreator = () => {
       <div className="mb-4">
         <h3 className="nes-text is-primary">Basic Information</h3>
         <p>Name: {npcData.basicInfo.name}</p>
-        <p>Background: {npcData.basicInfo.background.substring(0, 100)}...</p>
-        <p>Appearance: {npcData.basicInfo.appearance.substring(0, 100)}...</p>
+        <p>Background: {npcData.basicInfo.background.substring(0, 60)}...</p>
+        <p>Appearance: {npcData.basicInfo.appearance.substring(0, 60)}...</p>
       </div>
       <div className="mb-4">
         <h3 className="nes-text is-primary">Personality Traits</h3>

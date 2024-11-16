@@ -17,18 +17,20 @@ export default function Navbar() {
       }}
     >
       <div className="flex justify-between items-center">
-        <div className="flex items-center">
-          <Image
-            src="/npc-ai.png"
-            alt="NPC.ai Logo"
-            width={60}
-            height={60}
-            className=""
-          />
-          <span className="nes-text is-primary text-[#000] ml-2 text-xl">
-            NPC.ai
-          </span>
-        </div>
+        <Link href="/" style={{ textDecoration: "none" }}>
+          <div className="flex items-center">
+            <Image
+              src="/npc-ai.png"
+              alt="NPC.ai Logo"
+              width={60}
+              height={60}
+              className=""
+            />
+            <span className="nes-text is-primary text-[#000] ml-2 text-xl">
+              NPC.ai
+            </span>
+          </div>
+        </Link>
         <div className="hidden sm:flex items-center space-x-4">
           <Link href="/create" className="nes-btn is-primary">
             Create Agent
