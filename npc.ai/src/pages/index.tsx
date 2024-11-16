@@ -1,153 +1,79 @@
-"use client";
-
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
-import { createPublicClient, http } from "viem";
-import { sepolia } from "viem/chains";
+import { supabase } from "@/lib/supabase";
+import type { NPC } from "@/types/npc";
+import Link from "next/link";
 
-export default function Agent() {
-  const [messages, setMessages] = useState<
-    Array<{ type: string; content: string }>
-  >([]);
-  const [input, setInput] = useState("");
-  const [ensAddress, setEnsAddress] = useState<string | null>(null);
-  const wsRef = useRef<WebSocket | null>(null);
+const AllNPCs = () => {
+  const [npcs, setNpcs] = useState<NPC[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // WebSocket connection
-    wsRef.current = new WebSocket("ws://localhost:8000/ws");
-    wsRef.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setMessages((prev) => [...prev, data]);
-    };
-
-    // Create Sepolia client
-    const sepoliaClient = createPublicClient({
-      chain: sepolia,
-      transport: http(),
-    });
-
-    const resolveEns = async () => {
-      try {
-        const address = await sepoliaClient.getEnsAddress({
-          name: "npc.eth",
-        });
-
-        if (address) {
-          // Get the balance on Sepolia
-          const balance = await sepoliaClient.getBalance({
-            address: address,
-          });
-
-          setEnsAddress(`${address} (Balance: ${balance.toString()} wei)`);
-          console.log("ENS Address:", address);
-          console.log("Sepolia Balance:", balance.toString());
-        } else {
-          setEnsAddress("No address found");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        setEnsAddress(
-          "Error resolving address. Make sure the ENS name is registered on Sepolia."
-        );
-      }
-    };
-
-    resolveEns();
-
-    return () => wsRef.current?.close();
+    fetchNPCs();
   }, []);
 
-  const sendMessage = () => {
-    if (wsRef.current?.readyState === WebSocket.OPEN && input.trim()) {
-      wsRef.current.send(JSON.stringify({ message: input }));
-      setInput("");
-    }
-  };
-
-  // Add function to resolve any ENS name input by user
-  const resolveCustomEns = async (ensName: string) => {
+  const fetchNPCs = async () => {
     try {
-      const sepoliaClient = createPublicClient({
-        chain: sepolia,
-        transport: http(),
-      });
+      const { data, error } = await supabase
+        .from("npcs")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-      const address = await sepoliaClient.getEnsAddress({
-        name: ensName,
-      });
-
-      if (address) {
-        const balance = await sepoliaClient.getBalance({
-          address: address,
-        });
-        return `${address} (Balance: ${balance.toString()} wei)`;
-      }
-      return "No address found";
+      if (error) throw error;
+      setNpcs(data || []);
     } catch (error) {
-      console.error("Error:", error);
-      return "Error resolving address";
+      console.error("Error fetching NPCs:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleInput = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      if (input.endsWith(".eth")) {
-        const resolvedAddress = await resolveCustomEns(input);
-        setMessages((prev) => [
-          ...prev,
-          { type: "ENS Resolution", content: `${input} → ${resolvedAddress}` },
-        ]);
-      }
-      sendMessage();
-    }
-  };
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center min-h-screen">
+          <p>Loading NPCs...</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
-      <div className="p-4">
-        {/* Network Information */}
-        <div className="mb-4 p-2 bg-blue-100 rounded">
-          <p className="text-sm text-blue-800">
-            Network: Sepolia Testnet
-            <br />
-            Note: ENS names must be registered on Sepolia to resolve
-          </p>
-        </div>
-
-        {/* Display ENS address */}
-        {/* {ensAddress && (
-          <div className="mb-4 p-2 bg-gray-100 rounded">
-            <span className="font-bold">Resolved Address: </span>
-            {ensAddress}
-          </div>
-        )} */}
-
-        <div className="mb-4">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleInput}
-            className="mr-2 p-2 border"
-            placeholder="Enter ENS name or message..."
-          />
-          <button
-            onClick={sendMessage}
-            className="p-2 bg-blue-500 text-white rounded"
-          >
-            Send
-          </button>
-        </div>
-
-        <div className="space-y-2">
-          {messages.map((msg, i) => (
-            <div key={i} className="p-2 border rounded">
-              <span className="font-bold">{msg.type}: </span>
-              {msg.content}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-3xl font-bold mb-8 nes-text is-primary">
+          All NPCs
+        </h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {npcs.map((npc) => (
+            <div key={npc.id} className="nes-container with-title">
+              <p className="title">{npc.name}.npc.eth</p>
+              <div className="space-y-2">
+                <img
+                  src={npc.avatar}
+                  className="h-[100px] rounded-full"
+                  alt=""
+                />
+                <p className="text-sm">{npc.background.substring(0, 100)}...</p>
+                <div className="flex flex-wrap gap-2">
+                  {npc.core_values?.map((value) => (
+                    <span key={value} className="nes-badge">
+                      <span className="is-primary">{value}</span>
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-4">
+                  <Link href={`/npc/${npc.id}`} className="nes-btn is-primary">
+                    View Details
+                  </Link>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </div>
     </Layout>
   );
-}
+};
+
+export default AllNPCs;

@@ -42,14 +42,14 @@ export default function Navbar() {
           <Link href="/create" className="nes-btn is-primary">
             Create Agent
           </Link>
-          <Link href="/marketplace" className="nes-btn is-success">
-            Marketplace
+          <Link href="/battle" className="nes-btn is-warning">
+            Battle
           </Link>
-          <Link href="/about" className="nes-btn is-warning">
-            About
+          <Link href="/terminal" className="nes-btn is-success">
+            Terminal
           </Link>
-          <Link href="/all" className="nes-btn">
-            All NPCs
+          <Link href="/command-center" className="nes-btn">
+            Command Center
           </Link>
         </div>
         <button
