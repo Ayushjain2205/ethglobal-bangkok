@@ -58,30 +58,41 @@ def save_npc_config(config: dict) -> bool:
 async def create_wallet() -> dict:
     try:
         print("Initializing CDP SDK...")
+        load_dotenv()
         
-        # Configure CDP SDK with API credentials
-        api_key = os.getenv('CDP_API_KEY')
-        api_secret = os.getenv('CDP_API_SECRET')
-        network_id = os.getenv('CDP_NETWORK_ID', 'base-sepolia')
+        # Get credentials from environment
+        api_key_name = os.environ.get('CDP_API_KEY_NAME')
+        api_key_private_key = os.environ.get('CDP_API_KEY_PRIVATE_KEY')
+        network_id = os.environ.get('NETWORK_ID', 'base-sepolia')
         
-        if not api_key or not api_secret:
-            raise ValueError("CDP API credentials not found in environment variables")
+        if not api_key_name or not api_key_private_key:
+            raise ValueError("CDP API Key Name or CDP API Key Private Key is missing")
         
-        # Configure the SDK
-        Cdp.configure(api_key, api_secret)
+        # Configure the SDK with proper key formatting
+        private_key = api_key_private_key.replace('\\n', '\n')
+        Cdp.configure(api_key_name, private_key)
         print("CDP SDK configured successfully")
         
-        # Create a wallet using the Wallet class
-        print("Creating new wallet...")
-        wallet = Wallet.create(network_id)  # Changed from Cdp.create_wallet to Wallet.create
+        # Create a new wallet
+        print("Creating wallet...")
+        wallet = Wallet.create(network_id)
+        print(f"Wallet successfully created: {wallet}")
+
+        # Get the default address
+        default_address = wallet.default_address
+        print(f"Default address for wallet: {default_address}")
         
-        print(f"Wallet created successfully")
-        print(f"Address: {wallet.address}")
+        # Request funds from faucet
+        print("Requesting funds from faucet...")
+        faucet_tx = wallet.faucet()
+        faucet_tx.wait()
+        print("Faucet transaction completed")
         
         return {
             "status": "success",
-            "wallet_address": wallet.address,
-            "wallet_id": wallet.id if hasattr(wallet, 'id') else None
+            "wallet_address": default_address.address_id,
+            "wallet_id": wallet.id,
+            "network": network_id
         }
     except Exception as e:
         error_message = str(e)
@@ -114,7 +125,8 @@ async def create_new_wallet():
         if wallet_data["status"] == "success":
             return {
                 "status": "success",
-                "wallet_address": wallet_data["wallet_address"]
+                "wallet_address": wallet_data["wallet_address"],
+                "network": wallet_data["network"]
             }
         else:
             raise HTTPException(
