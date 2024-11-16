@@ -1,9 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import Layout from "@/components/Layout";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Confetti from "react-confetti";
 
 const CustomRange = ({
@@ -416,8 +413,29 @@ const NPCCreator = () => {
         setTransactionHash(
           "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
         );
-        // Here you would typically send the data to your backend
-        console.log("NPC Data:", npcData);
+
+        // Generate NPC config JSON
+        const npcConfig = {
+          name: npcData.basicInfo.name,
+          background: npcData.basicInfo.background,
+          appearance: npcData.basicInfo.appearance,
+          personality: {
+            riskTolerance: npcData.personality.riskTolerance,
+            rationality: npcData.personality.rationality,
+            autonomy: npcData.personality.autonomy,
+          },
+          coreValues: npcData.selectedValues,
+          primaryAims: npcData.selectedAims,
+          voice: {
+            type: npcData.voice.type,
+            sample: npcData.voice.sample ? npcData.voice.sample.name : null,
+          },
+          walletAddress: walletAddress,
+          transactionHash: transactionHash,
+        };
+
+        // Console log the NPC config
+        console.log("NPC Config:", JSON.stringify(npcConfig, null, 2));
       }
     }, 500);
   };

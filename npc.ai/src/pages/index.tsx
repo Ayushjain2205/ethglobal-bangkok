@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Layout from "@/components/Layout";
 
 export default function Agent() {
   const [messages, setMessages] = useState<
@@ -26,31 +27,33 @@ export default function Agent() {
   };
 
   return (
-    <div className="p-4">
-      <div className="mb-4">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-          className="mr-2 p-2 border"
-          placeholder="Ask the agent..."
-        />
-        <button
-          onClick={sendMessage}
-          className="p-2 bg-blue-500 text-white rounded"
-        >
-          Send
-        </button>
-      </div>
+    <Layout>
+      <div className="p-4">
+        <div className="mb-4">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+            className="mr-2 p-2 border"
+            placeholder="Ask the agent..."
+          />
+          <button
+            onClick={sendMessage}
+            className="p-2 bg-blue-500 text-white rounded"
+          >
+            Send
+          </button>
+        </div>
 
-      <div className="space-y-2">
-        {messages.map((msg, i) => (
-          <div key={i} className="p-2 border rounded">
-            <span className="font-bold">{msg.type}: </span>
-            {msg.content}
-          </div>
-        ))}
+        <div className="space-y-2">
+          {messages.map((msg, i) => (
+            <div key={i} className="p-2 border rounded">
+              <span className="font-bold">{msg.type}: </span>
+              {msg.content}
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 }
