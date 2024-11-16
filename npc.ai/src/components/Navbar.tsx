@@ -42,8 +42,8 @@ export default function Navbar() {
           <Link href="/create" className="nes-btn is-primary">
             Create Agent
           </Link>
-          <Link href="/battle" className="nes-btn is-warning">
-            Battle
+          <Link href="/breed" className="nes-btn is-warning">
+            Breed
           </Link>
           <Link href="/terminal" className="nes-btn is-success">
             Terminal
