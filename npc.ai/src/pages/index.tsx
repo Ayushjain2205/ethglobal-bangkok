@@ -1,8 +1,75 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { supabase } from "@/lib/supabase";
 import type { NPC } from "@/types/npc";
 import Link from "next/link";
+import { Coins, ImageIcon, FolderPlus, Zap } from "lucide-react";
+
+const NPCCard = ({ npc }: { npc: NPC }) => {
+  const truncateName = (name: string, maxLength: number) => {
+    if (!name) return "";
+    const baseName = name.replace(".npc.eth", "");
+    return baseName.length > maxLength
+      ? baseName.substring(0, maxLength - 3) + "..."
+      : baseName;
+  };
+
+  return (
+    <div className="nes-container is-rounded is-dark">
+      <div className="flex items-center space-x-4 mb-4">
+        <img
+          src={npc.avatar || "/placeholder.png"}
+          alt={npc.name}
+          className="w-16 h-16 rounded-full flex-shrink-0"
+        />
+        <div className="min-w-0 flex-1">
+          <h3 className="nes-text is-primary truncate">
+            {truncateName(npc.name, 12)}
+          </h3>
+          <p className="text-sm truncate">
+            {truncateName(npc.name, 12)}.npc.eth
+          </p>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
+        <div className="flex items-center">
+          <Coins className="mr-2" size={16} />
+          <span>
+            {typeof npc.balance === "number" ? npc.balance.toFixed(2) : "0.00"}{" "}
+            ETH
+          </span>
+        </div>
+        <div className="flex items-center">
+          <ImageIcon className="mr-2" size={16} />
+          <span>{npc.nfts || 0} NFTs</span>
+        </div>
+        <div className="flex items-center">
+          <FolderPlus className="mr-2" size={16} />
+          <span>{npc.collections || 0} Collections</span>
+        </div>
+        <div className="flex items-center">
+          <Zap className="mr-2" size={16} />
+          <span>{npc.core_values?.length || 0} Core Values</span>
+        </div>
+      </div>
+      <div className="mb-4">
+        <h4 className="nes-text is-success mb-2">Core Values</h4>
+        <div className="flex flex-wrap gap-2">
+          {npc.core_values?.slice(0, 3).map((value, index) => (
+            <span key={index} className="nes-badge">
+              <span className="is-primary">{value}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+      <Link href={`/npc/${npc.id}`} className="nes-btn is-primary w-full">
+        View Details
+      </Link>
+    </div>
+  );
+};
 
 const AllNPCs = () => {
   const [npcs, setNpcs] = useState<NPC[]>([]);
@@ -32,7 +99,7 @@ const AllNPCs = () => {
     return (
       <Layout>
         <div className="flex justify-center items-center min-h-screen">
-          <p>Loading NPCs...</p>
+          <p className="nes-text is-primary">Loading NPCs...</p>
         </div>
       </Layout>
     );
@@ -40,35 +107,13 @@ const AllNPCs = () => {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold mb-8 nes-text is-primary">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="nes-text is-primary text-center text-4xl mb-8">
           All NPCs
         </h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {npcs.map((npc) => (
-            <div key={npc.id} className="nes-container with-title">
-              <p className="title">{npc.name}.npc.eth</p>
-              <div className="space-y-2">
-                <img
-                  src={npc.avatar}
-                  className="h-[100px] rounded-full"
-                  alt=""
-                />
-                <p className="text-sm">{npc.background.substring(0, 100)}...</p>
-                <div className="flex flex-wrap gap-2">
-                  {npc.core_values?.map((value) => (
-                    <span key={value} className="nes-badge">
-                      <span className="is-primary">{value}</span>
-                    </span>
-                  ))}
-                </div>
-                <div className="mt-4">
-                  <Link href={`/npc/${npc.id}`} className="nes-btn is-primary">
-                    View Details
-                  </Link>
-                </div>
-              </div>
-            </div>
+            <NPCCard key={npc.id} npc={npc} />
           ))}
         </div>
       </div>

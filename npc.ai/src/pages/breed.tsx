@@ -16,14 +16,6 @@ import Confetti from "react-confetti";
 import { supabase } from "@/lib/supabase";
 import type { NPC } from "@/types/npc";
 
-interface ExtendedNPC extends NPC {
-  personality: {
-    riskTolerance: number;
-    rationality: number;
-    autonomy: number;
-  };
-}
-
 const PersonalityTrait = ({
   value,
   icon,
@@ -50,7 +42,7 @@ const PersonalityTrait = ({
   </div>
 );
 
-const NPCDisplay = ({ npc }: { npc: ExtendedNPC }) => (
+const NPCDisplay = ({ npc }: { npc: NPC }) => (
   <div className="nes-container with-title is-dark">
     <p className="title">{npc.name}.npc.eth</p>
     <div className="flex justify-center mb-4">
@@ -86,17 +78,17 @@ const NPCDisplay = ({ npc }: { npc: ExtendedNPC }) => (
     <div className="mb-4">
       <h3 className="nes-text is-primary mb-2">Personality</h3>
       <PersonalityTrait
-        value={npc.personality.riskTolerance}
+        value={npc.personality?.riskTolerance || 50}
         icon={<Dumbbell size={16} />}
         label="Risk Tolerance"
       />
       <PersonalityTrait
-        value={npc.personality.rationality}
+        value={npc.personality?.rationality || 50}
         icon={<Brain size={16} />}
         label="Rationality"
       />
       <PersonalityTrait
-        value={npc.personality.autonomy}
+        value={npc.personality?.autonomy || 50}
         icon={<Robot size={16} />}
         label="Autonomy"
       />
@@ -190,7 +182,7 @@ const NPCCard = ({
 export default function NPCBreeder() {
   const [npcs, setNpcs] = useState<NPC[]>([]);
   const [selectedNPCs, setSelectedNPCs] = useState<NPC[]>([]);
-  const [hybridNPC, setHybridNPC] = useState<ExtendedNPC | null>(null);
+  const [hybridNPC, setHybridNPC] = useState<NPC | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isBreeding, setIsBreeding] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -243,48 +235,39 @@ export default function NPCBreeder() {
     setIsBreeding(true);
     setTimeout(() => {
       const [npc1, npc2] = selectedNPCs;
-      const newNPC: ExtendedNPC = {
+      const newNPC: NPC = {
         ...npc1,
         id: `${npc1.id}-${npc2.id}`,
         name: `hybrid-${Date.now().toString().slice(-4)}.npc.eth`,
-        balance:
-          typeof npc1.balance === "number" && typeof npc2.balance === "number"
-            ? (npc1.balance + npc2.balance) / 2
-            : 0,
-        nfts: Math.floor(((npc1.nfts || 0) + (npc2.nfts || 0)) / 2),
+        balance: ((npc1.balance ?? 0) + (npc2.balance ?? 0)) / 2,
+        nfts: Math.floor(((npc1.nfts ?? 0) + (npc2.nfts ?? 0)) / 2),
         collections: Math.floor(
-          ((npc1.collections || 0) + (npc2.collections || 0)) / 2
+          ((npc1.collections ?? 0) + (npc2.collections ?? 0)) / 2
         ),
         avatar: `https://api.dicebear.com/6.x/pixel-art/svg?seed=${Math.random()}`,
-        core_values: [
-          ...new Set([
-            ...(npc1.core_values || []),
-            ...(npc2.core_values || []),
-          ]),
-        ].slice(0, 3),
-        primary_aims: [
-          ...new Set([
-            ...(npc1.primary_aims || []),
-            ...(npc2.primary_aims || []),
-          ]),
-        ].slice(0, 3),
+        core_values: Array.from(
+          new Set([...(npc1.core_values || []), ...(npc2.core_values || [])])
+        ).slice(0, 3),
+        primary_aims: Array.from(
+          new Set([...(npc1.primary_aims || []), ...(npc2.primary_aims || [])])
+        ).slice(0, 3),
         wallet_address: generateWallet(),
         background: `A unique blend of ${npc1.name} and ${npc2.name}, combining their diverse backgrounds.`,
         appearance: `An intriguing mix of ${npc1.name}'s and ${npc2.name}'s appearances, creating a truly distinctive look.`,
         personality: {
           riskTolerance: Math.round(
-            ((npc1.personality?.riskTolerance || 50) +
-              (npc2.personality?.riskTolerance || 50)) /
+            ((npc1.personality?.riskTolerance ?? 50) +
+              (npc2.personality?.riskTolerance ?? 50)) /
               2
           ),
           rationality: Math.round(
-            ((npc1.personality?.rationality || 50) +
-              (npc2.personality?.rationality || 50)) /
+            ((npc1.personality?.rationality ?? 50) +
+              (npc2.personality?.rationality ?? 50)) /
               2
           ),
           autonomy: Math.round(
-            ((npc1.personality?.autonomy || 50) +
-              (npc2.personality?.autonomy || 50)) /
+            ((npc1.personality?.autonomy ?? 50) +
+              (npc2.personality?.autonomy ?? 50)) /
               2
           ),
         },
@@ -323,7 +306,7 @@ export default function NPCBreeder() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               {selectedNPCs.map((npc) => (
-                <NPCDisplay key={npc.id} npc={npc as ExtendedNPC} />
+                <NPCDisplay key={npc.id} npc={npc} />
               ))}
             </div>
 

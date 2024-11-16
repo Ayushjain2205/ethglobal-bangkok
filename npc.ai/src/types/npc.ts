@@ -8,24 +8,20 @@ export interface WalletInfo {
 }
 
 export interface NPC {
-  id?: string;
-  created_at?: string;
-  updated_at?: string;
+  id: string;
   name: string;
-  background: string;
-  appearance: string;
-  personality: {
+  avatar?: string;
+  balance?: number;
+  nfts?: number;
+  collections?: number;
+  wallet_address?: string;
+  core_values?: string[];
+  primary_aims?: string[];
+  background?: string;
+  appearance?: string;
+  personality?: {
     riskTolerance: number;
     rationality: number;
     autonomy: number;
   };
-  core_values: string[];
-  primary_aims: string[];
-  voice: {
-    type: string;
-    sample: string | null;
-  };
-  wallet: WalletInfo;
-  avatar: string;
-  domain?: string;
 }
