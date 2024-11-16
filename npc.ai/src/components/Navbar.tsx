@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [avatarKey, setAvatarKey] = useState(0);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAvatarKey((prev) => prev + 1);
+    }, 5000); // Change image every 2 seconds
+
+    return () => clearInterval(interval);
+  }, []);
   return (
     <nav
       className="nes-container is-rounded"
@@ -19,12 +27,11 @@ export default function Navbar() {
       <div className="flex justify-between items-center">
         <Link href="/" style={{ textDecoration: "none" }}>
           <div className="flex items-center">
-            <Image
-              src="/npc-ai.png"
-              alt="NPC.ai Logo"
-              width={60}
-              height={60}
-              className=""
+            <img
+              key={avatarKey}
+              src={`https://api.cloudnouns.com/v1/pfp?timestamp=${avatarKey}`}
+              alt="NPC Avatar"
+              className="rounded-full h-[60px] w-[60px]"
             />
             <span className="nes-text is-primary text-[#000] ml-2 text-xl">
               NPC.ai
