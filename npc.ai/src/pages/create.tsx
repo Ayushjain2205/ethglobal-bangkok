@@ -71,6 +71,8 @@ const CustomRange = ({
 
 const NPCCreator = () => {
   const [step, setStep] = useState(1);
+  const [isCreating, setIsCreating] = useState(false);
+  const [creationProgress, setCreationProgress] = useState(0);
   const [npcData, setNpcData] = useState({
     basicInfo: {
       name: "",
@@ -86,8 +88,7 @@ const NPCCreator = () => {
     selectedAims: [],
     voice: {
       type: "",
-      pitch: 50,
-      speed: 50,
+      sample: null,
     },
   });
 
@@ -156,6 +157,19 @@ const NPCCreator = () => {
     }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNpcData((prev) => ({
+        ...prev,
+        voice: {
+          ...prev.voice,
+          sample: file,
+        },
+      }));
+    }
+  };
+
   const renderStep = () => {
     switch (step) {
       case 1:
@@ -170,7 +184,7 @@ const NPCCreator = () => {
                 <img
                   src="https://noun-api.com/beta/pfp"
                   alt="NPC Avatar"
-                  className="rounded-full h-[10"
+                  className="rounded-full h-[100px] w-[100px]"
                 />
               </div>
             </div>
@@ -294,43 +308,83 @@ const NPCCreator = () => {
         return (
           <div className="nes-container with-title">
             <p className="title">Voice Settings</p>
-            <div className="nes-select mb-6">
-              <select
-                name="type"
-                value={npcData.voice.type}
-                onChange={(e) => handleInputChange(e, "voice")}
-              >
-                <option value="">Select Voice Type</option>
-                <option value="friendly">Friendly</option>
-                <option value="professional">Professional</option>
-                <option value="authoritative">Authoritative</option>
-                <option value="casual">Casual</option>
-              </select>
+            <div className="nes-field mb-6">
+              <label htmlFor="voiceType">Voice Type</label>
+              <div className="nes-select">
+                <select
+                  id="voiceType"
+                  name="type"
+                  value={npcData.voice.type}
+                  onChange={(e) => handleInputChange(e, "voice")}
+                >
+                  <option value="">Select Voice Type</option>
+                  <option value="friendly">Friendly</option>
+                  <option value="professional">Professional</option>
+                  <option value="authoritative">Authoritative</option>
+                  <option value="casual">Casual</option>
+                </select>
+              </div>
             </div>
-            <CustomRange
-              value={npcData.voice.pitch}
-              onChange={(value) =>
-                handleInputChange({ target: { name: "pitch", value } }, "voice")
-              }
-              label="Pitch"
-              leftLabel="Low"
-              rightLabel="High"
-            />
-            <CustomRange
-              value={npcData.voice.speed}
-              onChange={(value) =>
-                handleInputChange({ target: { name: "speed", value } }, "voice")
-              }
-              label="Speed"
-              leftLabel="Slow"
-              rightLabel="Fast"
-            />
+            <div className="nes-field mb-6">
+              <label htmlFor="voiceSample">Upload Voice Sample</label>
+              <div className="nes-btn">
+                <label>
+                  Choose file
+                  <input
+                    type="file"
+                    id="voiceSample"
+                    accept="audio/*"
+                    onChange={handleFileChange}
+                    style={{ display: "none" }}
+                  />
+                </label>
+              </div>
+              {npcData.voice.sample && (
+                <p className="mt-2">
+                  File selected: {npcData.voice.sample.name}
+                </p>
+              )}
+            </div>
           </div>
         );
       default:
         return null;
     }
   };
+
+  const renderSummary = () => (
+    <div className="nes-container with-title">
+      <p className="title">NPC Summary</p>
+      <div className="mb-4">
+        <h3 className="nes-text is-primary">Basic Information</h3>
+        <p>Name: {npcData.basicInfo.name}</p>
+        <p>Background: {npcData.basicInfo.background.substring(0, 100)}...</p>
+        <p>Appearance: {npcData.basicInfo.appearance.substring(0, 100)}...</p>
+      </div>
+      <div className="mb-4">
+        <h3 className="nes-text is-primary">Personality Traits</h3>
+        <p>Risk Tolerance: {npcData.personality.riskTolerance}</p>
+        <p>Decision Making: {npcData.personality.rationality}</p>
+        <p>Autonomy Level: {npcData.personality.autonomy}</p>
+      </div>
+      <div className="mb-4">
+        <h3 className="nes-text is-primary">Core Values</h3>
+        <p>{npcData.selectedValues.join(", ")}</p>
+      </div>
+      <div className="mb-4">
+        <h3 className="nes-text is-primary">Primary Aims</h3>
+        <p>{npcData.selectedAims.join(", ")}</p>
+      </div>
+      <div className="mb-4">
+        <h3 className="nes-text is-primary">Voice Settings</h3>
+        <p>Type: {npcData.voice.type}</p>
+        <p>
+          Sample:{" "}
+          {npcData.voice.sample ? npcData.voice.sample.name : "Not provided"}
+        </p>
+      </div>
+    </div>
+  );
 
   const handleNext = () => {
     if (step < 5) setStep(step + 1);
@@ -341,31 +395,57 @@ const NPCCreator = () => {
   };
 
   const handleSubmit = () => {
-    console.log("NPC Data:", npcData);
-    // Here you would typically send the data to your backend
+    setIsCreating(true);
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      setCreationProgress(progress);
+      if (progress >= 100) {
+        clearInterval(interval);
+        setIsCreating(false);
+        // Here you would typically send the data to your backend
+        console.log("NPC Data:", npcData);
+      }
+    }, 500);
   };
 
   return (
     <Layout>
       <div className="max-w-2xl mx-auto space-y-6">
         <h1 className="nes-text is-primary text-center">Create Your NPC</h1>
-        {renderStep()}
-        <div className="flex justify-between">
-          {step > 1 && (
-            <button className="nes-btn" onClick={handlePrev}>
-              Previous
-            </button>
-          )}
-          {step < 5 ? (
-            <button className="nes-btn is-primary" onClick={handleNext}>
-              Next
-            </button>
-          ) : (
-            <button className="nes-btn is-success" onClick={handleSubmit}>
-              Create NPC
-            </button>
-          )}
-        </div>
+        {isCreating ? (
+          <>
+            {renderSummary()}
+            <div className="nes-container">
+              <p>Creating your NPC...</p>
+              <progress
+                className="nes-progress is-pattern"
+                value={creationProgress}
+                max="100"
+              ></progress>
+            </div>
+          </>
+        ) : (
+          <>
+            {renderStep()}
+            <div className="flex justify-between">
+              {step > 1 && (
+                <button className="nes-btn" onClick={handlePrev}>
+                  Previous
+                </button>
+              )}
+              {step < 5 ? (
+                <button className="nes-btn is-primary" onClick={handleNext}>
+                  Next
+                </button>
+              ) : (
+                <button className="nes-btn is-success" onClick={handleSubmit}>
+                  Create NPC
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </Layout>
   );
