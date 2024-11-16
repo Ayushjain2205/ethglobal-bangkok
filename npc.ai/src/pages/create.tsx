@@ -173,6 +173,82 @@ const NPCCreator = () => {
     }
   };
 
+  const sendConfigToBackend = async (npcConfig: any) => {
+    try {
+      const response = await fetch("http://localhost:8000/npc-config", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(npcConfig),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send NPC configuration");
+      }
+
+      const data = await response.json();
+      console.log("Backend response:", data);
+      return true;
+    } catch (error) {
+      console.error("Error sending NPC config:", error);
+      return false;
+    }
+  };
+
+  const handleSubmit = async () => {
+    setIsCreating(true);
+    let progress = 0;
+
+    // Generate NPC config JSON
+    const npcConfig = {
+      name: npcData.basicInfo.name,
+      background: npcData.basicInfo.background,
+      appearance: npcData.basicInfo.appearance,
+      personality: {
+        riskTolerance: npcData.personality.riskTolerance,
+        rationality: npcData.personality.rationality,
+        autonomy: npcData.personality.autonomy,
+      },
+      coreValues: npcData.selectedValues,
+      primaryAims: npcData.selectedAims,
+      voice: {
+        type: npcData.voice.type,
+        sample: npcData.voice.sample ? npcData.voice.sample.name : null,
+      },
+      walletAddress: "0x1234567890123456789012345678901234567890", // This will be set after creation
+      transactionHash:
+        "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890", // This will be set after creation
+    };
+
+    const interval = setInterval(async () => {
+      progress += 10;
+      setCreationProgress(progress);
+
+      if (progress >= 100) {
+        clearInterval(interval);
+
+        // Send config to backend
+        const success = await sendConfigToBackend(npcConfig);
+
+        if (success) {
+          setIsCreating(false);
+          setCreationComplete(true);
+          setShowConfetti(true);
+          setWalletAddress(npcConfig.walletAddress);
+          setTransactionHash(npcConfig.transactionHash);
+
+          // Console log the NPC config
+          console.log("NPC Config:", JSON.stringify(npcConfig, null, 2));
+        } else {
+          // Handle error
+          alert("Failed to save NPC configuration");
+          setIsCreating(false);
+        }
+      }
+    }, 500);
+  };
+
   const renderStep = () => {
     switch (step) {
       case 1:
@@ -395,49 +471,6 @@ const NPCCreator = () => {
 
   const handlePrev = () => {
     if (step > 1) setStep(step - 1);
-  };
-
-  const handleSubmit = () => {
-    setIsCreating(true);
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 10;
-      setCreationProgress(progress);
-      if (progress >= 100) {
-        clearInterval(interval);
-        setIsCreating(false);
-        setCreationComplete(true);
-        setShowConfetti(true);
-        // Simulating blockchain transaction
-        setWalletAddress("0x1234567890123456789012345678901234567890");
-        setTransactionHash(
-          "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
-        );
-
-        // Generate NPC config JSON
-        const npcConfig = {
-          name: npcData.basicInfo.name,
-          background: npcData.basicInfo.background,
-          appearance: npcData.basicInfo.appearance,
-          personality: {
-            riskTolerance: npcData.personality.riskTolerance,
-            rationality: npcData.personality.rationality,
-            autonomy: npcData.personality.autonomy,
-          },
-          coreValues: npcData.selectedValues,
-          primaryAims: npcData.selectedAims,
-          voice: {
-            type: npcData.voice.type,
-            sample: npcData.voice.sample ? npcData.voice.sample.name : null,
-          },
-          walletAddress: walletAddress,
-          transactionHash: transactionHash,
-        };
-
-        // Console log the NPC config
-        console.log("NPC Config:", JSON.stringify(npcConfig, null, 2));
-      }
-    }, 500);
   };
 
   const renderCreationStatus = () => (

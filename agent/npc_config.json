@@ -1,0 +1,23 @@
+{
+  "name": "Botswald",
+  "background": "A mysterious figure with a hidden past, this NPC grew up in the shadowy alleys of a bustling cyberpunk metropolis. Their life changed when they discovered their innate ability to manipulate digital realities.",
+  "appearance": "Tall and lithe, with neon-blue hair and silver cybernetic eyes. Wears a sleek, black exosuit adorned with glowing circuit patterns. A holographic interface flickers around their left arm.",
+  "personality": {
+    "riskTolerance": 50,
+    "rationality": 50,
+    "autonomy": 50
+  },
+  "coreValues": [
+    "competitive",
+    "creative"
+  ],
+  "primaryAims": [
+    "community"
+  ],
+  "voice": {
+    "type": "",
+    "sample": null
+  },
+  "walletAddress": "0x1234567890123456789012345678901234567890",
+  "transactionHash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+}
