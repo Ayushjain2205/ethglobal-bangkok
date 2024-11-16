@@ -16,6 +16,8 @@ from typing import Optional, Literal
 from datetime import datetime
 from supabase import create_client, Client
 from cdp import Cdp, Wallet
+from web3 import Web3
+from eth_account import Account
 
 
 # Load environment variables
@@ -64,6 +66,9 @@ class NPCConfig(BaseModel):
 
 wallet_data_file = "wallet_data.txt"
 npc_config_file = "npc_config.json"
+
+RPC_URL = "https://base-sepolia.blockpi.network/v1/rpc/public"
+CONTRACT_ADDRESS = "0xab8CF91658009e0Eb123c60bCe2120A7E13C9ff2"
 
 
 def save_npc_config(config: dict) -> bool:
@@ -119,6 +124,69 @@ async def create_wallet() -> dict:
            "status": "error",
            "message": str(e)
        }
+
+
+async def register_npc_domain(domain_name: str, owner_address: str) -> dict:
+    try:
+        private_key = os.getenv("ETH_PRIVATE_KEY")
+        if not private_key:
+            raise ValueError("ETH_PRIVATE_KEY not found in environment variables")
+
+        # Connect to network
+        w3 = Web3(Web3.HTTPProvider(RPC_URL))
+        
+        # Create account object from private key
+        account = Account.from_key(private_key)
+        
+        # Contract ABI - only including the register function
+        abi = [
+            {
+                "inputs": [
+                    {"internalType": "string", "name": "label", "type": "string"},
+                    {"internalType": "address", "name": "owner", "type": "address"}
+                ],
+                "name": "register",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ]
+        
+        # Create contract instance
+        contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=abi)
+        
+        # Build transaction
+        nonce = w3.eth.get_transaction_count(account.address)
+        
+        transaction = contract.functions.register(
+            domain_name,
+            owner_address
+        ).build_transaction({
+            'from': account.address,
+            'nonce': nonce,
+            'gas': 300000,
+            'gasPrice': w3.eth.gas_price
+        })
+        
+        # Sign transaction
+        signed_txn = w3.eth.account.sign_transaction(transaction, private_key)
+        
+        # Send transaction
+        tx_hash = w3.eth.send_raw_transaction(signed_txn.raw_transaction)
+        
+        # Wait for transaction receipt
+        receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+        
+        return {
+            "status": "success",
+            "transaction_hash": receipt['transactionHash'].hex()
+        }
+    except Exception as e:
+        print(f"Error registering domain: {str(e)}")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
 
 
 @app.get("/")
@@ -239,22 +307,30 @@ async def save_config(config: NPCConfig):
                detail=f"Failed to create wallet: {wallet_data['message']}"
            )
            
+       # Register domain name
+       domain_name = config.name.lower().replace(" ", "-")  # Convert name to domain-friendly format
+       domain_result = await register_npc_domain(domain_name, wallet_data["wallet_address"])
+       
+       if domain_result["status"] != "success":
+           print(f"Warning: Failed to register domain: {domain_result['message']}")
+           
        # Create wallet info
        wallet_info = WalletInfo(
            wallet_address=wallet_data["wallet_address"],
            wallet_id=wallet_data["wallet_id"],
+           transaction_hash=domain_result.get("transaction_hash"),
            network="base-sepolia",
            status="active",
            balance="0"
        )
        
-       # Prepare complete NPC data
+       # Prepare complete NPC data (without domain field)
        npc_data = {
            **config.dict(),
            "wallet": wallet_info.dict(),
            "avatar": f"https://api.cloudnouns.com/v1/pfp?text={wallet_info.wallet_address}",
            "created_at": datetime.utcnow().isoformat(),
-           "updated_at": datetime.utcnow().isoformat()
+           "updated_at": datetime.utcnow().isoformat(),
        }
        
        # Save to Supabase
@@ -263,6 +339,15 @@ async def save_config(config: NPCConfig):
        if len(result.data) == 0:
            raise HTTPException(status_code=500, detail="Failed to save NPC to database")
            
+       # Add domain to response but not to database
+       response_data = {
+           "status": "success",
+           "message": "NPC created successfully",
+           "npc": {**result.data[0], "domain": f"{domain_name}.npc.eth"},
+           "wallet": wallet_info.dict(),
+           "domain": f"{domain_name}.npc.eth"
+       }
+       
        # Save local config for agent
        if not save_npc_config(npc_data):
            print("Warning: Failed to save NPC configuration file")
@@ -271,12 +356,7 @@ async def save_config(config: NPCConfig):
        global agent_executor
        agent_executor, agent_config = initialize_agent()
        
-       return {
-           "status": "success",
-           "message": "NPC created successfully",
-           "npc": result.data[0],
-           "wallet": wallet_info.dict()
-       }
+       return response_data
        
    except HTTPException as he:
        raise he

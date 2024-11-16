@@ -47,7 +47,7 @@ const AllNPCs = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {npcs.map((npc) => (
             <div key={npc.id} className="nes-container with-title">
-              <p className="title">{npc.name}</p>
+              <p className="title">{npc.name}.npc.eth</p>
               <div className="space-y-2">
                 <img
                   src={npc.avatar}

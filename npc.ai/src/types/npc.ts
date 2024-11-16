@@ -27,4 +27,5 @@ export interface NPC {
   };
   wallet: WalletInfo;
   avatar: string;
+  domain?: string;
 }

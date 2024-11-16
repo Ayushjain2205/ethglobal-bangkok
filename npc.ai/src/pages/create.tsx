@@ -4,6 +4,11 @@ import Layout from "@/components/Layout";
 import Confetti from "react-confetti";
 import { supabase } from "@/lib/supabase";
 
+const truncateAddress = (address: string) => {
+  if (!address) return "";
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
+
 const CustomRange = ({
   value,
   onChange,
@@ -104,6 +109,7 @@ const NPCCreator = () => {
     balance: "0",
     status: "pending",
   });
+  const [npcDomain, setNpcDomain] = useState<string>("");
 
   const predefinedValues = [
     { id: "analytical", label: "Analytical", icon: "🔍" },
@@ -216,8 +222,9 @@ const NPCCreator = () => {
         throw new Error("Failed to create NPC");
       }
 
-      const { wallet, npc } = await response.json();
+      const { wallet, domain } = await response.json();
       setWalletInfo(wallet);
+      setNpcDomain(domain);
       setCreationComplete(true);
       setShowConfetti(true);
     } catch (error) {
@@ -468,22 +475,24 @@ const NPCCreator = () => {
     <div className="nes-container with-title">
       <p className="title">NPC Created Successfully!</p>
       <div className="mb-4">
-        <p className="mb-2">Wallet Address: {walletInfo.wallet_address}</p>
-        <p>Transaction Hash: {walletInfo.transaction_hash || "Pending..."}</p>
+        <div className="flex items-center gap-2 mb-2">
+          <p>{npcData.basicInfo.name}.npc.eth</p>
+          {walletInfo.transaction_hash && (
+            <button
+              className=""
+              onClick={() =>
+                window.open(
+                  `https://base-sepolia.blockscout.com/tx/0x${walletInfo.transaction_hash}`,
+                  "_blank"
+                )
+              }
+            >
+              ↗️
+            </button>
+          )}
+        </div>
+        <p>Wallet: {truncateAddress(walletInfo.wallet_address)}</p>
       </div>
-      {walletInfo.transaction_hash && (
-        <button
-          className="nes-btn is-primary"
-          onClick={() =>
-            window.open(
-              `https://base-sepolia.blockscout.com/tx/${walletInfo.transaction_hash}`,
-              "_blank"
-            )
-          }
-        >
-          View on Block Explorer
-        </button>
-      )}
     </div>
   );
 
@@ -494,6 +503,24 @@ const NPCCreator = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    let direction = 1;
+    let progress = 0;
+
+    if (isCreating) {
+      const interval = setInterval(() => {
+        setCreationProgress((prev) => {
+          const next = prev + direction * 2;
+          if (next >= 100) direction = -1;
+          if (next <= 0) direction = 1;
+          return next;
+        });
+      }, 50);
+
+      return () => clearInterval(interval);
+    }
+  }, [isCreating]);
 
   return (
     <Layout>

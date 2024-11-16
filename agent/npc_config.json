@@ -1,27 +1,31 @@
 {
-  "name": "asd",
-  "background": "asd",
-  "appearance": "asd",
+  "name": "asdads",
+  "background": "a",
+  "appearance": "a",
   "personality": {
     "riskTolerance": 50,
     "rationality": 50,
     "autonomy": 50
   },
-  "core_values": [],
-  "primary_aims": [],
+  "core_values": [
+    "competitive"
+  ],
+  "primary_aims": [
+    "community"
+  ],
   "voice": {
     "type": "",
     "sample": null
   },
   "wallet": {
-    "wallet_address": "0xa3a3E73071ED946a943A893FacFF5e6715D353B2",
-    "wallet_id": "feb1bb9f-4b01-43c6-bfea-2ab4d4df2cb0",
-    "transaction_hash": null,
+    "wallet_address": "0x16eB6c714847eC1BecF307670332Ec8217130113",
+    "wallet_id": "31386114-762d-4c21-9e46-bfc1ec6da3c4",
+    "transaction_hash": "760595f0b845e14e67dcba120db16787fa97b5e8dbf8c63bb044ebb03f68a85a",
     "network": "base-sepolia",
     "balance": "0",
     "status": "active"
   },
-  "avatar": "https://api.cloudnouns.com/v1/pfp?text=0xa3a3E73071ED946a943A893FacFF5e6715D353B2",
-  "created_at": "2024-11-16T10:02:47.378482",
-  "updated_at": "2024-11-16T10:02:47.378498"
+  "avatar": "https://api.cloudnouns.com/v1/pfp?text=0x16eB6c714847eC1BecF307670332Ec8217130113",
+  "created_at": "2024-11-16T15:57:07.053170",
+  "updated_at": "2024-11-16T15:57:07.053185"
 }

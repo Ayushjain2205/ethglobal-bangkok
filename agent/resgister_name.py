@@ -62,12 +62,12 @@ def register_domain(domain_name: str, owner_address: str, private_key: str, rpc_
 
 if __name__ == "__main__":
     # Configuration
-    DOMAIN_NAME = "example1"  # Domain name to register
+    DOMAIN_NAME = "example2"  # Domain name to register
     OWNER_ADDRESS = "0xCafa93E9985793E2475bD58B9215c21Dbd421fD0"
     RPC_URL = "https://base-sepolia.blockpi.network/v1/rpc/public"  # e.g., "https://mainnet.infura.io/v3/YOUR-PROJECT-ID"
     CONTRACT_ADDRESS = "0xab8CF91658009e0Eb123c60bCe2120A7E13C9ff2"
     ETH_PRIVATE_KEY =  os.getenv("ETH_PRIVATE_KEY")  # Private key of the registrar account
-    print(ETH_PRIVATE_KEY)
+  
     
     try:
         # Check if Web3 is connected
