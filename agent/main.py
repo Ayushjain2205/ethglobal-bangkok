@@ -204,8 +204,8 @@ def initialize_agent():
        - Risk Tolerance: {npc_config['personality']['riskTolerance']}
        - Rationality: {npc_config['personality']['rationality']}
        - Autonomy: {npc_config['personality']['autonomy']}
-       - Core Values: {', '.join(npc_config['coreValues'])}
-       - Primary Aims: {', '.join(npc_config['primaryAims'])}
+       - Core Values: {', '.join(npc_config['core_values'])}
+       - Primary Aims: {', '.join(npc_config['primary_aims'])}
       
        Incorporate these traits into your responses and decision-making.
        """
@@ -315,4 +315,3 @@ async def websocket_endpoint(websocket: WebSocket):
 if __name__ == "__main__":
    import uvicorn
    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
-

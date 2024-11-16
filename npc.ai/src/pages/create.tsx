@@ -455,12 +455,14 @@ const NPCCreator = () => {
 
   const renderCreationStatus = () => (
     <div className="nes-container">
-      <p>Creating your NPC...</p>
-      <progress
-        className="nes-progress is-pattern"
-        value={creationProgress}
-        max="100"
-      ></progress>
+      <div className="flex flex-col items-center justify-center space-y-4">
+        <div className="nes-text is-primary">Creating your NPC...</div>
+        <progress
+          className="nes-progress is-pattern"
+          value={creationProgress}
+          max="100"
+        ></progress>
+      </div>
     </div>
   );
 
@@ -469,10 +471,6 @@ const NPCCreator = () => {
       <p className="title">NPC Created Successfully!</p>
       <div className="mb-4">
         <p className="mb-2">Wallet Address: {walletInfo.wallet_address}</p>
-        <p className="mb-2">Wallet ID: {walletInfo.wallet_id}</p>
-        <p className="mb-2">Network: {walletInfo.network}</p>
-        <p className="mb-2">Balance: {walletInfo.balance}</p>
-        <p className="mb-2">Status: {walletInfo.status}</p>
         <p>Transaction Hash: {walletInfo.transaction_hash || "Pending..."}</p>
       </div>
       {walletInfo.transaction_hash && (
@@ -498,6 +496,22 @@ const NPCCreator = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (isCreating) {
+      interval = setInterval(() => {
+        setCreationProgress((prev) => (prev >= 100 ? 0 : prev + 1));
+      }, 50); // Adjust speed by changing this value
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isCreating]);
 
   return (
     <Layout>

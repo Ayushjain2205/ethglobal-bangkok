@@ -5,8 +5,9 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export type NPC = {
+export interface NPC {
   id: string;
+  created_at: string;
   name: string;
   background: string;
   appearance: string;
@@ -15,21 +16,12 @@ export type NPC = {
     rationality: number;
     autonomy: number;
   };
-  core_values: string[];
-  primary_aims: string[];
+  coreValues: string[];
+  primaryAims: string[];
   voice: {
     type: string;
     sample: string | null;
   };
-  wallet: {
-    wallet_address: string;
-    wallet_id: string;
-    network: string;
-    balance: string;
-    status: "active" | "pending" | "inactive";
-    transaction_hash?: string;
-  };
-  created_at: string;
-  updated_at: string;
-  avatar?: string;
-};
+  walletAddress: string;
+  transactionHash: string;
+}
