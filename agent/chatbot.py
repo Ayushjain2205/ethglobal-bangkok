@@ -1,6 +1,8 @@
 from fastapi import FastAPI, WebSocket, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import os
+from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
@@ -9,15 +11,40 @@ from cdp_langchain.agent_toolkits import CdpToolkit
 from cdp_langchain.utils import CdpAgentkitWrapper
 import json
 
+# Load environment variables
+load_dotenv()
+
 app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Add your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Define request model
+class NPCConfig(BaseModel):
+    name: str
+    background: str
+    appearance: str
+    personality: dict
+    coreValues: list
+    primaryAims: list
+    voice: dict
+    walletAddress: str
+    transactionHash: str
 
 wallet_data_file = "wallet_data.txt"
 npc_config_file = "npc_config.json"
 
-# Add this function to save NPC config
-def save_npc_config(config):
+def save_npc_config(config: dict) -> bool:
     try:
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(npc_config_file), exist_ok=True)
+        
         with open(npc_config_file, 'w') as f:
             json.dump(config, f, indent=2)
         return True
@@ -84,15 +111,18 @@ def initialize_agent():
         state_modifier=state_modifier,
     ), config
 
-# Add new endpoint to receive NPC config
 @app.post("/npc-config")
-async def save_config(config: dict):
-    if save_npc_config(config):
-        # Reinitialize agent with new config
-        global agent_executor
-        agent_executor, config = initialize_agent()
-        return {"status": "success", "message": "NPC configuration saved and agent reinitialized"}
-    raise HTTPException(status_code=500, detail="Failed to save NPC configuration")
+async def save_config(config: NPCConfig):
+    try:
+        config_dict = config.dict()
+        if save_npc_config(config_dict):
+            # Reinitialize agent with new config
+            global agent_executor
+            agent_executor, config = initialize_agent()
+            return {"status": "success", "message": "NPC configuration saved and agent reinitialized"}
+        raise HTTPException(status_code=500, detail="Failed to save NPC configuration")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 agent_executor, config = initialize_agent()
 
@@ -117,4 +147,4 @@ async def websocket_endpoint(websocket: WebSocket):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)

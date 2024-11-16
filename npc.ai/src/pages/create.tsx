@@ -179,12 +179,14 @@ const NPCCreator = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify(npcConfig),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send NPC configuration");
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to send NPC configuration");
       }
 
       const data = await response.json();
@@ -192,6 +194,7 @@ const NPCCreator = () => {
       return true;
     } catch (error) {
       console.error("Error sending NPC config:", error);
+      alert(error.message);
       return false;
     }
   };
