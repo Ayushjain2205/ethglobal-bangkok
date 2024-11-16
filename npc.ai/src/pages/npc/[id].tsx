@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useParams } from "next/navigation";
 import Layout from "@/components/Layout";
 import { supabase } from "@/lib/supabase";
 import type { NPC } from "@/types/npc";
@@ -42,16 +42,34 @@ const PersonalityTrait = ({
 );
 
 export default function NPCDetail() {
-  const router = useRouter();
-  const { id } = router.query;
+  const params = useParams();
+  const { id } = params;
   const [npc, setNpc] = useState<NPC | null>(null);
   const [loading, setLoading] = useState(true);
+  const [thoughts, setThoughts] = useState<string[]>([]);
 
   useEffect(() => {
     if (id) {
       fetchNPCDetails();
     }
   }, [id]);
+
+  useEffect(() => {
+    // Generate initial thoughts for the past 2 hours
+    const initialThoughts = generateInitialThoughts();
+    setThoughts(initialThoughts);
+
+    const interval = setInterval(() => {
+      const newThought = generateRandomThought();
+      const timestamp = new Date().toLocaleTimeString();
+      setThoughts((prevThoughts) => [
+        ...prevThoughts,
+        `[${timestamp}] ${newThought}`,
+      ]);
+    }, 60000); // Update every 60000 milliseconds (1 minute)
+
+    return () => clearInterval(interval);
+  }, []);
 
   const fetchNPCDetails = async () => {
     try {
@@ -68,6 +86,33 @@ export default function NPCDetail() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const generateRandomThought = () => {
+    const thoughts = [
+      "Analyzing market trends...",
+      "Calculating optimal trade routes...",
+      "Evaluating potential partnerships...",
+      "Updating blockchain knowledge...",
+      "Simulating economic scenarios...",
+      "Optimizing resource allocation...",
+      "Predicting future technology trends...",
+      "Assessing risk factors...",
+      "Exploring new investment opportunities...",
+      "Reviewing smart contract security...",
+    ];
+    return thoughts[Math.floor(Math.random() * thoughts.length)];
+  };
+
+  const generateInitialThoughts = () => {
+    const initialThoughts = [];
+    const now = new Date();
+    for (let i = 120; i >= 0; i--) {
+      const timestamp = new Date(now.getTime() - i * 60000);
+      const thought = generateRandomThought();
+      initialThoughts.push(`[${timestamp.toLocaleTimeString()}] ${thought}`);
+    }
+    return initialThoughts;
   };
 
   if (loading) {
@@ -190,6 +235,30 @@ export default function NPCDetail() {
                   {npc.appearance || "No appearance description"}
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* Terminal Section */}
+          <div className="mt-8">
+            <h3 className="nes-text is-error mb-2">NPC Terminal</h3>
+            <div
+              className="nes-container is-dark with-title is-rounded"
+              style={{
+                height: "400px",
+                overflowY: "auto",
+                backgroundColor: "#000",
+              }}
+            >
+              <p className="title">Thoughts</p>
+              {thoughts.map((thought, index) => (
+                <p
+                  key={index}
+                  className="text-xs mb-1"
+                  style={{ color: "#00ff00" }}
+                >
+                  {thought}
+                </p>
+              ))}
             </div>
           </div>
         </div>
