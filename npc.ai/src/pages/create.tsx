@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Layout from "@/components/Layout";
 
 const CustomRange = ({
@@ -12,27 +12,52 @@ const CustomRange = ({
   leftLabel,
   rightLabel,
 }) => {
-  const handleClick = (e) => {
-    const rect = e.target.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percent = x / rect.width;
-    const newValue = Math.round(percent * (max - min) + min);
-    onChange(newValue);
+  const [isDragging, setIsDragging] = useState(false);
+  const rangeRef = useRef(null);
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    handleMouseMove(e);
   };
+
+  const handleMouseMove = (e) => {
+    if (isDragging || e.type === "click") {
+      const rect = rangeRef.current.getBoundingClientRect();
+      const x = Math.min(Math.max(0, e.clientX - rect.left), rect.width);
+      const percent = x / rect.width;
+      const newValue = Math.round(percent * (max - min) + min);
+      onChange(newValue);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging]);
 
   return (
     <div className="mb-4">
       <label className="block mb-2">{label}</label>
-      <div className="relative">
-        <progress
-          className="nes-progress is-primary w-full"
-          value={value}
-          max={max}
-          onClick={handleClick}
-        />
+      <div
+        className=" relative cursor-pointer"
+        ref={rangeRef}
+        onMouseDown={handleMouseDown}
+        onClick={handleMouseMove}
+      >
+        <progress className="nes-progress is-primary" value={value} max={max} />
         <div
-          className="absolute top-0 left-0 w-2 h-full bg-white"
-          style={{ left: `calc(${(value / max) * 100}% - 4px)` }}
+          className="absolute top-0 w-4 h-full bg-black border-2 border-white"
+          style={{
+            left: `calc(${((value - min) / (max - min)) * 100}% - 8px)`,
+          }}
         />
       </div>
       <div className="flex justify-between text-xs mt-1">
