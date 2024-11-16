@@ -475,23 +475,38 @@ const NPCCreator = () => {
     <div className="nes-container with-title">
       <p className="title">NPC Created Successfully!</p>
       <div className="mb-4">
-        <div className="flex items-center gap-2 mb-2">
-          <p>{npcData.basicInfo.name}.npc.eth</p>
-          {walletInfo.transaction_hash && (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <p>{npcData.basicInfo.name}.npc.eth</p>
+            {walletInfo.transaction_hash && (
+              <button
+                className="hover:opacity-70"
+                onClick={() =>
+                  window.open(
+                    `https://base-sepolia.blockscout.com/tx/${walletInfo.transaction_hash}`,
+                    "_blank"
+                  )
+                }
+              >
+                ↗️
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <p>{truncateAddress(walletInfo.wallet_address)}</p>
             <button
-              className=""
+              className="hover:opacity-70"
               onClick={() =>
                 window.open(
-                  `https://base-sepolia.blockscout.com/tx/0x${walletInfo.transaction_hash}`,
+                  `https://base-sepolia.blockscout.com/address/${walletInfo.wallet_address}`,
                   "_blank"
                 )
               }
             >
               ↗️
             </button>
-          )}
+          </div>
         </div>
-        <p>Wallet: {truncateAddress(walletInfo.wallet_address)}</p>
       </div>
     </div>
   );
