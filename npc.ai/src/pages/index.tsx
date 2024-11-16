@@ -5,7 +5,6 @@ import Layout from "@/components/Layout";
 import { supabase } from "@/lib/supabase";
 import type { NPC } from "@/types/npc";
 import Link from "next/link";
-import { Coins, ImageIcon, FolderPlus, Zap } from "lucide-react";
 
 const NPCCard = ({ npc }: { npc: NPC }) => {
   const truncateName = (name: string, maxLength: number) => {
@@ -16,8 +15,29 @@ const NPCCard = ({ npc }: { npc: NPC }) => {
       : baseName;
   };
 
+  const truncateAddress = (address: string) => {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const generateRandomEth = () => {
+    return (Math.random() * (0.1 - 0.01) + 0.01).toFixed(4);
+  };
+
+  const generateRandomAddress = () => {
+    return (
+      "0x" +
+      Array(40)
+        .fill(0)
+        .map(() => Math.floor(Math.random() * 16).toString(16))
+        .join("")
+    );
+  };
+
+  const ethValue = npc.balance || Number(generateRandomEth());
+  const address = npc.wallet_address || generateRandomAddress();
+
   return (
-    <div className="nes-container is-rounded is-dark">
+    <div className="nes-container is-rounded hover:shadow-lg transition-shadow duration-300 relative">
       <div className="flex items-center space-x-4 mb-4">
         <img
           src={npc.avatar || "/placeholder.png"}
@@ -31,40 +51,41 @@ const NPCCard = ({ npc }: { npc: NPC }) => {
           <p className="text-sm truncate">
             {truncateName(npc.name, 12)}.npc.eth
           </p>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
-        <div className="flex items-center">
-          <Coins className="mr-2" size={16} />
-          <span>
-            {typeof npc.balance === "number" ? npc.balance.toFixed(2) : "0.00"}{" "}
-            ETH
-          </span>
-        </div>
-        <div className="flex items-center">
-          <ImageIcon className="mr-2" size={16} />
-          <span>{npc.nfts || 0} NFTs</span>
-        </div>
-        <div className="flex items-center">
-          <FolderPlus className="mr-2" size={16} />
-          <span>{npc.collections || 0} Collections</span>
-        </div>
-        <div className="flex items-center">
-          <Zap className="mr-2" size={16} />
-          <span>{npc.core_values?.length || 0} Core Values</span>
+          <p className="text-xs text-gray-500">{truncateAddress(address)}</p>
         </div>
       </div>
       <div className="mb-4">
         <h4 className="nes-text is-success mb-2">Core Values</h4>
         <div className="flex flex-wrap gap-2">
-          {npc.core_values?.slice(0, 3).map((value, index) => (
-            <span key={index} className="nes-badge">
-              <span className="is-primary">{value}</span>
-            </span>
-          ))}
+          {(npc.core_values || ["Integrity", "Innovation", "Collaboration"])
+            .slice(0, 3)
+            .map((value, index) => (
+              <span key={index} className="nes-badge">
+                <span className="is-primary">{value}</span>
+              </span>
+            ))}
         </div>
       </div>
-      <Link href={`/npc/${npc.id}`} className="nes-btn is-primary w-full">
+      <div className="mb-4">
+        <h4 className="nes-text is-warning mb-2">Primary Aims</h4>
+        <div className="flex flex-wrap gap-2">
+          {(npc.primary_aims || ["Profit", "Growth", "Innovation"])
+            .slice(0, 3)
+            .map((aim, index) => (
+              <span key={index} className="nes-badge">
+                <span className="is-warning">{aim}</span>
+              </span>
+            ))}
+        </div>
+      </div>
+      <div className="mb-4">
+        <h4 className="nes-text is-error mb-2">Value Added</h4>
+        <p className="text-sm">{ethValue} ETH</p>
+      </div>
+      <Link
+        href={`/npc/${npc.id}`}
+        className="nes-btn is-primary w-full opacity-0 hover:opacity-100 transition-opacity duration-300 absolute inset-0 flex items-center justify-center"
+      >
         View Details
       </Link>
     </div>
