@@ -10,18 +10,24 @@ export default function Navbar() {
   return (
     <nav
       className="nes-container is-rounded"
-      style={{ backgroundColor: "#fff", marginBottom: "20px" }}
+      style={{
+        backgroundColor: "#fff",
+        marginBottom: "20px",
+        padding: "0.5rem",
+      }}
     >
       <div className="flex justify-between items-center">
         <div className="flex items-center">
           <Image
-            src="/placeholder.svg?height=40&width=40"
+            src="/npc-ai.png"
             alt="NPC.ai Logo"
-            width={40}
-            height={40}
-            className="nes-avatar is-rounded"
+            width={60}
+            height={60}
+            className=""
           />
-          <span className="nes-text is-primary ml-2 text-xl">NPC.ai</span>
+          <span className="nes-text is-primary text-[#000] ml-2 text-xl">
+            NPC.ai
+          </span>
         </div>
         <div className="hidden sm:flex items-center space-x-4">
           <Link href="/create" className="nes-btn is-primary">

@@ -6,6 +6,15 @@ body {
   font-family: "Press Start 2P", cursive;
 }
 
+.nes-btn {
+  margin: 4px;
+}
+.nes-container {
+}
+.nes-btn.is-primary {
+  color: white;
+}
+
 @layer base {
   :root {
     --radius: 0.5rem;
