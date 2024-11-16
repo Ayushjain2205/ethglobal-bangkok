@@ -49,9 +49,20 @@ const AllNPCs = () => {
             <div key={npc.id} className="nes-container with-title">
               <p className="title">{npc.name}</p>
               <div className="space-y-2">
-                <p className="text-sm">{npc.background.substring(0, 100)}...</p>
+                <div className="flex items-center space-x-4 mb-4">
+                  {npc.avatar && (
+                    <img
+                      src={npc.avatar}
+                      alt={npc.name}
+                      className="w-16 h-16 rounded-full"
+                    />
+                  )}
+                  <p className="text-sm">
+                    {npc.background.substring(0, 100)}...
+                  </p>
+                </div>
                 <div className="flex flex-wrap gap-2">
-                  {npc.coreValues.map((value) => (
+                  {npc.core_values?.map((value) => (
                     <span key={value} className="nes-badge">
                       <span className="is-primary">{value}</span>
                     </span>

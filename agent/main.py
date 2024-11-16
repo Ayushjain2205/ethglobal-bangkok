@@ -12,8 +12,9 @@ from cdp_langchain.utils import CdpAgentkitWrapper
 import json
 import traceback
 from pathlib import Path
-
-
+from typing import Optional, Literal
+from datetime import datetime
+from supabase import create_client, Client
 from cdp import Cdp, Wallet
 
 
@@ -21,6 +22,14 @@ from cdp import Cdp, Wallet
 load_dotenv()
 
 
+# Initialize Supabase client
+supabase: Client = create_client(
+    os.getenv("SUPABASE_URL"),
+    os.getenv("SUPABASE_SERVICE_KEY")
+)
+
+
+# Initialize FastAPI app
 app = FastAPI()
 
 
@@ -35,16 +44,22 @@ app.add_middleware(
 
 
 # Define request model
+class WalletInfo(BaseModel):
+    wallet_address: str
+    wallet_id: str
+    transaction_hash: Optional[str] = None
+    network: str = "base-sepolia"
+    balance: Optional[str] = "0"
+    status: Literal['active', 'pending', 'inactive']
+
 class NPCConfig(BaseModel):
-   name: str
-   background: str
-   appearance: str
-   personality: dict
-   coreValues: list
-   primaryAims: list
-   voice: dict
-   walletAddress: str
-   transactionHash: str
+    name: str
+    background: str
+    appearance: str
+    personality: dict
+    core_values: list
+    primary_aims: list
+    voice: dict
 
 
 wallet_data_file = "wallet_data.txt"
@@ -59,6 +74,10 @@ def save_npc_config(config: dict) -> bool:
        # Ensure the parent directory exists
        config_path.parent.mkdir(parents=True, exist_ok=True)
        
+       # Ensure avatar field exists
+       if 'walletAddress' in config and not 'avatar' in config:
+           config['avatar'] = f"https://api.cloudnouns.com/v1/pfp?text={config['walletAddress']}"
+           
        # Write the config with better error handling
        with open(config_path, 'w', encoding='utf-8') as f:
            json.dump(config, f, indent=2, ensure_ascii=False)
@@ -212,7 +231,6 @@ def initialize_agent():
 async def save_config(config: NPCConfig):
    try:
        # Create wallet for the NPC
-       print("Creating wallet for NPC...")
        wallet_data = await create_wallet()
        
        if wallet_data["status"] != "success":
@@ -221,38 +239,52 @@ async def save_config(config: NPCConfig):
                detail=f"Failed to create wallet: {wallet_data['message']}"
            )
            
-       # Add wallet data to config
-       config_dict = config.dict()
-       config_dict["wallet_address"] = wallet_data["wallet_address"]
-       config_dict["wallet_id"] = wallet_data["wallet_id"]
+       # Create wallet info
+       wallet_info = WalletInfo(
+           wallet_address=wallet_data["wallet_address"],
+           wallet_id=wallet_data["wallet_id"],
+           network="base-sepolia",
+           status="active",
+           balance="0"
+       )
        
-       print(f"Created wallet for NPC. Address: {wallet_data['wallet_address']}")
-       print(f"Wallet ID: {wallet_data['wallet_id']}")
+       # Prepare complete NPC data
+       npc_data = {
+           **config.dict(),
+           "wallet": wallet_info.dict(),
+           "avatar": f"https://api.cloudnouns.com/v1/pfp?text={wallet_info.wallet_address}",
+           "created_at": datetime.utcnow().isoformat(),
+           "updated_at": datetime.utcnow().isoformat()
+       }
        
-       if not save_npc_config(config_dict):
-           raise HTTPException(
-               status_code=500, 
-               detail="Failed to save NPC configuration to file"
-           )
+       # Save to Supabase
+       result = supabase.table('npcs').insert(npc_data).execute()
+       
+       if len(result.data) == 0:
+           raise HTTPException(status_code=500, detail="Failed to save NPC to database")
            
-       # Reinitialize agent with new config
+       # Save local config for agent
+       if not save_npc_config(npc_data):
+           print("Warning: Failed to save NPC configuration file")
+       
+       # Reinitialize agent
        global agent_executor
-       agent_executor, config = initialize_agent()
+       agent_executor, agent_config = initialize_agent()
        
        return {
            "status": "success",
-           "message": "NPC configuration saved and agent reinitialized",
-           "wallet_address": wallet_data["wallet_address"],
-           "wallet_id": wallet_data["wallet_id"]
+           "message": "NPC created successfully",
+           "npc": result.data[0],
+           "wallet": wallet_info.dict()
        }
+       
    except HTTPException as he:
-       # Re-raise HTTP exceptions
        raise he
    except Exception as e:
        print(f"Error in save_config: {str(e)}")
        print(f"Traceback: {traceback.format_exc()}")
        raise HTTPException(
-           status_code=500, 
+           status_code=500,
            detail=f"Failed to process NPC configuration: {str(e)}"
        )
 

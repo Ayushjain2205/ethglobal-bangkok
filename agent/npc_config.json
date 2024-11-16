@@ -1,24 +1,31 @@
 {
   "name": "Botswald",
-  "background": "asd",
-  "appearance": "asd",
+  "background": "",
+  "appearance": "",
   "personality": {
     "riskTolerance": 50,
     "rationality": 50,
     "autonomy": 50
   },
-  "coreValues": [
+  "core_values": [
     "aggressive"
   ],
-  "primaryAims": [
+  "primary_aims": [
     "community"
   ],
   "voice": {
     "type": "",
     "sample": null
   },
-  "walletAddress": "0x1234567890123456789012345678901234567890",
-  "transactionHash": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-  "wallet_address": "0x3B2faF9Aba59092375C55D835B312F1E0Bcec11e",
-  "wallet_id": "e36b8d83-833e-429c-a9bb-56b76e6ade4e"
+  "wallet": {
+    "wallet_address": "0x629AAA18593b9e8136409D301ED98Ff01267757C",
+    "wallet_id": "4aea238e-938d-4f4b-91f1-0ab1b0d6b465",
+    "transaction_hash": null,
+    "network": "base-sepolia",
+    "balance": "0",
+    "status": "active"
+  },
+  "avatar": "https://api.cloudnouns.com/v1/pfp?text=0x629AAA18593b9e8136409D301ED98Ff01267757C",
+  "created_at": "2024-11-16T09:44:22.221954",
+  "updated_at": "2024-11-16T09:44:22.221986"
 }

@@ -95,6 +95,15 @@ const NPCCreator = () => {
       sample: null,
     },
   });
+  const [avatarKey, setAvatarKey] = useState(0);
+  const [walletInfo, setWalletInfo] = useState<WalletInfo>({
+    wallet_address: "",
+    wallet_id: "",
+    transaction_hash: "",
+    network: "base-sepolia",
+    balance: "0",
+    status: "pending",
+  });
 
   const predefinedValues = [
     { id: "analytical", label: "Analytical", icon: "🔍" },
@@ -174,90 +183,49 @@ const NPCCreator = () => {
     }
   };
 
-  const sendConfigToBackend = async (npcConfig: any) => {
-    try {
-      const { data, error } = await supabase
-        .from("npcs")
-        .insert([npcConfig])
-        .select();
+  const handleSubmit = async () => {
+    setIsCreating(true);
 
-      if (error) throw error;
+    try {
+      const npcConfig = {
+        name: npcData.basicInfo.name,
+        background: npcData.basicInfo.background,
+        appearance: npcData.basicInfo.appearance,
+        personality: {
+          riskTolerance: npcData.personality.riskTolerance,
+          rationality: npcData.personality.rationality,
+          autonomy: npcData.personality.autonomy,
+        },
+        core_values: npcData.selectedValues,
+        primary_aims: npcData.selectedAims,
+        voice: {
+          type: npcData.voice.type,
+          sample: npcData.voice.sample ? npcData.voice.sample.name : null,
+        },
+      };
 
       const response = await fetch("http://localhost:8000/npc-config", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/json",
         },
         body: JSON.stringify(npcConfig),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Failed to send NPC configuration");
+        throw new Error("Failed to create NPC");
       }
 
-      const backendData = await response.json();
-      console.log("Backend response:", backendData);
-      return true;
-    } catch (error: any) {
-      console.error("Error saving NPC:", error);
-      alert(error.message);
-      return false;
+      const { wallet, npc } = await response.json();
+      setWalletInfo(wallet);
+      setCreationComplete(true);
+      setShowConfetti(true);
+    } catch (error) {
+      console.error("Error creating NPC:", error);
+      alert("Failed to create NPC. Please try again.");
+    } finally {
+      setIsCreating(false);
     }
-  };
-
-  const handleSubmit = async () => {
-    setIsCreating(true);
-    let progress = 0;
-
-    // Generate NPC config JSON
-    const npcConfig = {
-      name: npcData.basicInfo.name,
-      background: npcData.basicInfo.background,
-      appearance: npcData.basicInfo.appearance,
-      personality: {
-        riskTolerance: npcData.personality.riskTolerance,
-        rationality: npcData.personality.rationality,
-        autonomy: npcData.personality.autonomy,
-      },
-      coreValues: npcData.selectedValues,
-      primaryAims: npcData.selectedAims,
-      voice: {
-        type: npcData.voice.type,
-        sample: npcData.voice.sample ? npcData.voice.sample.name : null,
-      },
-      walletAddress: "0x1234567890123456789012345678901234567890", // This will be set after creation
-      transactionHash:
-        "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890", // This will be set after creation
-    };
-
-    const interval = setInterval(async () => {
-      progress += 10;
-      setCreationProgress(progress);
-
-      if (progress >= 100) {
-        clearInterval(interval);
-
-        // Send config to backend
-        const success = await sendConfigToBackend(npcConfig);
-
-        if (success) {
-          setIsCreating(false);
-          setCreationComplete(true);
-          setShowConfetti(true);
-          setWalletAddress(npcConfig.walletAddress);
-          setTransactionHash(npcConfig.transactionHash);
-
-          // Console log the NPC config
-          console.log("NPC Config:", JSON.stringify(npcConfig, null, 2));
-        } else {
-          // Handle error
-          alert("Failed to save NPC configuration");
-          setIsCreating(false);
-        }
-      }
-    }, 500);
   };
 
   const renderStep = () => {
@@ -272,7 +240,8 @@ const NPCCreator = () => {
                 style={{ width: "100px", height: "100px" }}
               >
                 <img
-                  src="https://noun-api.com/beta/pfp"
+                  key={avatarKey}
+                  src={`https://api.cloudnouns.com/v1/pfp?timestamp=${avatarKey}`}
                   alt="NPC Avatar"
                   className="rounded-full h-[100px] w-[100px]"
                 />
@@ -499,19 +468,36 @@ const NPCCreator = () => {
     <div className="nes-container with-title">
       <p className="title">NPC Created Successfully!</p>
       <div className="mb-4">
-        <p className="mb-2">Wallet Address: {walletAddress}</p>
-        <p>Transaction Hash: {transactionHash}</p>
+        <p className="mb-2">Wallet Address: {walletInfo.wallet_address}</p>
+        <p className="mb-2">Wallet ID: {walletInfo.wallet_id}</p>
+        <p className="mb-2">Network: {walletInfo.network}</p>
+        <p className="mb-2">Balance: {walletInfo.balance}</p>
+        <p className="mb-2">Status: {walletInfo.status}</p>
+        <p>Transaction Hash: {walletInfo.transaction_hash || "Pending..."}</p>
       </div>
-      <button
-        className="nes-btn is-primary"
-        onClick={() =>
-          window.open(`https://etherscan.io/tx/${transactionHash}`, "_blank")
-        }
-      >
-        View on Block Explorer
-      </button>
+      {walletInfo.transaction_hash && (
+        <button
+          className="nes-btn is-primary"
+          onClick={() =>
+            window.open(
+              `https://base-sepolia.blockscout.com/tx/${walletInfo.transaction_hash}`,
+              "_blank"
+            )
+          }
+        >
+          View on Block Explorer
+        </button>
+      )}
     </div>
   );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAvatarKey((prev) => prev + 1);
+    }, 2000); // Change image every 2 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <Layout>
