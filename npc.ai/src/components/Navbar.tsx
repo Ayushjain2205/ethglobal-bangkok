@@ -41,6 +41,9 @@ export default function Navbar() {
           <Link href="/about" className="nes-btn is-warning">
             About
           </Link>
+          <Link href="/all" className="nes-btn">
+            All NPCs
+          </Link>
         </div>
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -63,6 +66,9 @@ export default function Navbar() {
           </Link>
           <Link href="/about" className="nes-btn is-warning block w-full">
             About
+          </Link>
+          <Link href="/all" className="nes-btn block w-full">
+            All NPCs
           </Link>
         </div>
       )}

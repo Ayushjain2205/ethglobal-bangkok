@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Layout from "@/components/Layout";
 import Confetti from "react-confetti";
+import { supabase } from "@/lib/supabase";
 
 const CustomRange = ({
   value,
@@ -175,6 +176,13 @@ const NPCCreator = () => {
 
   const sendConfigToBackend = async (npcConfig: any) => {
     try {
+      const { data, error } = await supabase
+        .from("npcs")
+        .insert([npcConfig])
+        .select();
+
+      if (error) throw error;
+
       const response = await fetch("http://localhost:8000/npc-config", {
         method: "POST",
         headers: {
@@ -189,11 +197,11 @@ const NPCCreator = () => {
         throw new Error(errorData.detail || "Failed to send NPC configuration");
       }
 
-      const data = await response.json();
-      console.log("Backend response:", data);
+      const backendData = await response.json();
+      console.log("Backend response:", backendData);
       return true;
-    } catch (error) {
-      console.error("Error sending NPC config:", error);
+    } catch (error: any) {
+      console.error("Error saving NPC:", error);
       alert(error.message);
       return false;
     }
