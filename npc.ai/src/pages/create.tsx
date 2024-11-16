@@ -3,6 +3,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import Layout from "@/components/Layout";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Confetti from "react-confetti";
 
 const CustomRange = ({
   value,
@@ -73,6 +76,10 @@ const NPCCreator = () => {
   const [step, setStep] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
   const [creationProgress, setCreationProgress] = useState(0);
+  const [creationComplete, setCreationComplete] = useState(false);
+  const [walletAddress, setWalletAddress] = useState("");
+  const [transactionHash, setTransactionHash] = useState("");
+  const [showConfetti, setShowConfetti] = useState(false);
   const [npcData, setNpcData] = useState({
     basicInfo: {
       name: "",
@@ -403,29 +410,53 @@ const NPCCreator = () => {
       if (progress >= 100) {
         clearInterval(interval);
         setIsCreating(false);
+        setCreationComplete(true);
+        setShowConfetti(true);
+        // Simulating blockchain transaction
+        setWalletAddress("0x1234567890123456789012345678901234567890");
+        setTransactionHash(
+          "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+        );
         // Here you would typically send the data to your backend
         console.log("NPC Data:", npcData);
       }
     }, 500);
   };
 
+  const renderCreationStatus = () => (
+    <div className="nes-container">
+      <p>Creating your NPC...</p>
+      <progress
+        className="nes-progress is-pattern"
+        value={creationProgress}
+        max="100"
+      ></progress>
+    </div>
+  );
+
+  const renderWalletInfo = () => (
+    <div className="nes-container with-title">
+      <p className="title">NPC Created Successfully!</p>
+      <div className="mb-4">
+        <p className="mb-2">Wallet Address: {walletAddress}</p>
+        <p>Transaction Hash: {transactionHash}</p>
+      </div>
+      <button
+        className="nes-btn is-primary"
+        onClick={() =>
+          window.open(`https://etherscan.io/tx/${transactionHash}`, "_blank")
+        }
+      >
+        View on Block Explorer
+      </button>
+    </div>
+  );
+
   return (
     <Layout>
       <div className="max-w-2xl mx-auto space-y-6">
         <h1 className="nes-text is-primary text-center">Create Your NPC</h1>
-        {isCreating ? (
-          <>
-            {renderSummary()}
-            <div className="nes-container">
-              <p>Creating your NPC...</p>
-              <progress
-                className="nes-progress is-pattern"
-                value={creationProgress}
-                max="100"
-              ></progress>
-            </div>
-          </>
-        ) : (
+        {!isCreating && !creationComplete && (
           <>
             {renderStep()}
             <div className="flex justify-between">
@@ -445,6 +476,22 @@ const NPCCreator = () => {
               )}
             </div>
           </>
+        )}
+        {(isCreating || creationComplete) && (
+          <>
+            {renderSummary()}
+            {isCreating && renderCreationStatus()}
+            {creationComplete && renderWalletInfo()}
+          </>
+        )}
+        {showConfetti && (
+          <Confetti
+            width={window.innerWidth}
+            height={window.innerHeight}
+            recycle={false}
+            numberOfPieces={200}
+            gravity={0.1}
+          />
         )}
       </div>
     </Layout>
