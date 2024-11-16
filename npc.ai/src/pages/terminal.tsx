@@ -23,7 +23,7 @@ interface NPC {
 interface Activity {
   id: string;
   npc_id: string;
-  type: "transaction" | "thought";
+  type: "transaction" | "thought" | "thinking";
   content: string;
   timestamp: string;
 }
@@ -46,6 +46,8 @@ const ActivityIcon = ({ type }: { type: string }) => {
       return <ImageIcon className="text-pink-500" size={16} />;
     case "thought":
       return <Brain className="text-cyan-500" size={16} />;
+    case "thinking":
+      return <Brain className="text-green-500" size={16} />;
     default:
       return null;
   }
@@ -93,6 +95,7 @@ export default function GlobalTerminal() {
       "createToken",
       "createNFT",
       "thought",
+      "thinking",
     ];
     const thoughts = [
       "Analyzing market trends...",
@@ -106,6 +109,18 @@ export default function GlobalTerminal() {
       "Exploring new investment opportunities...",
       "Reviewing smart contract security...",
     ];
+    const randomThoughts = [
+      "What if blockchain was made of actual blocks? 🤔",
+      "Do NFTs dream of electric sheep?",
+      "Is mining crypto just teaching rocks to think?",
+      "What if we could stake emotions instead of tokens?",
+      "Are smart contracts smarter than me?",
+      "If I hodl long enough, will I become one with the blockchain?",
+      "What's the gas fee on sending a virtual hug?",
+      "Is the metaverse just a fancy way of saying 'very online'?",
+      "Do decentralized networks have a center of gravity?",
+      "If I fork a blockchain, does it become a spoon?",
+    ];
 
     for (let i = 0; i < 50; i++) {
       const npc = npcs[Math.floor(Math.random() * npcs.length)];
@@ -115,6 +130,9 @@ export default function GlobalTerminal() {
 
       if (type === "thought") {
         content = thoughts[Math.floor(Math.random() * thoughts.length)];
+      } else if (type === "thinking") {
+        content =
+          randomThoughts[Math.floor(Math.random() * randomThoughts.length)];
       } else if (["send", "receive"].includes(type)) {
         content = `${type} ${(Math.random() * 10).toFixed(3)} ETH`;
       } else if (type === "mintNFT") {
@@ -134,7 +152,12 @@ export default function GlobalTerminal() {
       newActivities.push({
         id: `activity-${Date.now()}-${i}`,
         npc_id: npc.id,
-        type: type === "thought" ? "thought" : "transaction",
+        type:
+          type === "thinking"
+            ? "thinking"
+            : type === "thought"
+            ? "thought"
+            : "transaction",
         content,
         timestamp: new Date(Date.now() - Math.random() * 3600000).toISOString(), // Random time within the last hour
       });
@@ -198,14 +221,20 @@ export default function GlobalTerminal() {
                         type={
                           activity.type === "transaction"
                             ? activity.content.split(" ")[0]
-                            : "thought"
+                            : activity.type
                         }
                       />
                       <span className="text-xs text-gray-500 ml-2">
                         {getRelativeTime(activity.timestamp)}
                       </span>
                     </div>
-                    <p className="text-sm">{activity.content}</p>
+                    <p
+                      className={`text-sm ${
+                        activity.type === "thinking" ? "text-green-400" : ""
+                      }`}
+                    >
+                      {activity.content}
+                    </p>
                   </div>
                 </div>
               );
