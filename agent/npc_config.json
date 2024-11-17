@@ -1,31 +1,33 @@
 {
-  "name": "Botswald",
+  "name": "Ethboi",
   "background": "A mysterious figure with a hidden past, this NPC grew up in the shadowy alleys of a bustling cyberpunk metropolis. Their life changed when they discovered their innate ability to manipulate digital realities.",
   "appearance": "Tall and lithe, with neon-blue hair and silver cybernetic eyes. Wears a sleek, black exosuit adorned with glowing circuit patterns. A holographic interface flickers around their left arm.",
   "personality": {
-    "riskTolerance": 83,
-    "rationality": 27,
-    "autonomy": 86
+    "riskTolerance": 100,
+    "rationality": 7,
+    "autonomy": 98
   },
   "core_values": [
+    "competitive",
     "aggressive"
   ],
   "primary_aims": [
-    "stability"
+    "profit",
+    "growth"
   ],
   "voice": {
-    "type": "professional",
+    "type": "friendly",
     "sample": null
   },
   "wallet": {
-    "wallet_address": "0x18A717dBE3Cb01148E3eea68B5D60a968e3d4701",
-    "wallet_id": "32a41a40-7ce4-4f09-be2c-bae884bf0d7a",
-    "transaction_hash": "5891ca31d288e9ab518c5dcf3bbed057c1eaa7b4942543163c1b6315e85d3127",
+    "wallet_address": "0x55f840F9fB2de2c07d77d9317649cA917A438A8d",
+    "wallet_id": "eb06254b-e22c-4388-92f6-60f282a15b07",
+    "transaction_hash": "c3d987dc35bceeecd7b30fc28fc3a3d9b1b843147546183030703d670ab46aad",
     "network": "base-sepolia",
     "balance": "0",
     "status": "active"
   },
-  "avatar": "https://api.cloudnouns.com/v1/pfp?text=0x18A717dBE3Cb01148E3eea68B5D60a968e3d4701",
-  "created_at": "2024-11-17T00:28:11.183174",
-  "updated_at": "2024-11-17T00:28:11.183202"
+  "avatar": "https://api.cloudnouns.com/v1/pfp?text=0x55f840F9fB2de2c07d77d9317649cA917A438A8d",
+  "created_at": "2024-11-17T01:01:48.903750",
+  "updated_at": "2024-11-17T01:01:48.903783"
 }

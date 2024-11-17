@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, HTTPException
+from fastapi import FastAPI, WebSocket, HTTPException, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
@@ -38,7 +38,7 @@ app = FastAPI()
 # Configure CORS
 app.add_middleware(
    CORSMiddleware,
-   allow_origins=["http://localhost:3000"],  # Add your frontend URL
+   allow_origins=["*"],  # In production, specify your frontend URL
    allow_credentials=True,
    allow_methods=["*"],
    allow_headers=["*"],
@@ -374,22 +374,66 @@ agent_executor, config = initialize_agent()
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-   await websocket.accept()
-   try:
-       while True:
-           data = await websocket.receive_json()
-           message = data.get('message', '')
-          
-           for chunk in agent_executor.stream(
-               {"messages": [HumanMessage(content=message)]},
-               config
-           ):
-               if "agent" in chunk:
-                   await websocket.send_json({"type": "agent", "content": chunk["agent"]["messages"][0].content})
-               elif "tools" in chunk:
-                   await websocket.send_json({"type": "tools", "content": chunk["tools"]["messages"][0].content})
-   except Exception as e:
-       await websocket.close()
+    await websocket.accept()
+    print("WebSocket connected")
+    
+    while True:
+        try:
+            # Receive message
+            data = await websocket.receive_json()
+            message = data.get('message', '')
+            
+            if not message:
+                continue
+                
+            if message == "ping":
+                await websocket.send_json({"type": "pong", "content": "pong"})
+                continue
+            
+            print(f"Received message: {message}")
+            
+            # Process message synchronously since agent_executor doesn't support async
+            try:
+                for chunk in agent_executor.stream(
+                    {"messages": [HumanMessage(content=message)]},
+                    config
+                ):
+                    if chunk is None:
+                        continue
+                        
+                    if "agent" in chunk and chunk["agent"]["messages"]:
+                        await websocket.send_json({
+                            "type": "agent",
+                            "content": chunk["agent"]["messages"][0].content
+                        })
+                        print(f"Sent agent response: {chunk['agent']['messages'][0].content}")
+                    
+                    elif "tools" in chunk and chunk["tools"]["messages"]:
+                        await websocket.send_json({
+                            "type": "tools",
+                            "content": chunk["tools"]["messages"][0].content
+                        })
+                        print(f"Sent tools response: {chunk['tools']['messages'][0].content}")
+                        
+            except Exception as e:
+                print(f"Error processing message: {str(e)}")
+                await websocket.send_json({
+                    "type": "agent",
+                    "content": f"Error processing message: {str(e)}"
+                })
+                
+        except WebSocketDisconnect:
+            print("WebSocket disconnected")
+            break
+        except Exception as e:
+            print(f"WebSocket error: {str(e)}")
+            try:
+                await websocket.send_json({
+                    "type": "error",
+                    "content": f"An error occurred: {str(e)}"
+                })
+            except:
+                break
 
 
 if __name__ == "__main__":

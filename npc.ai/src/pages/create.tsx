@@ -532,7 +532,7 @@ const NPCCreator: React.FC = () => {
                 className="hover:opacity-70"
                 onClick={() =>
                   window.open(
-                    `https://base-sepolia.blockscout.com/tx/${walletInfo.transaction_hash}`,
+                    `https://base-sepolia.blockscout.com/tx/0x${walletInfo.transaction_hash}`,
                     "_blank"
                   )
                 }
