@@ -9,6 +9,8 @@ Create autonomous AI agents with their own wallets and personalities. These NPCs
 ### Base
 
 - Deployed on Base Sepolia testnet
+- Link https://base-sepolia.blockscout.com/address/0x6578BC8312E690d9B7DAf2458EEE070a2cdF15b8
+- https://base-sepolia.blockscout.com/address/0xab8CF91658009e0Eb123b0bCe2120A7E13C9ff2
 - Leverages high performance and low costs while maintaining Ethereum compatibility
 - Perfect for frequent AI agent interactions
 
