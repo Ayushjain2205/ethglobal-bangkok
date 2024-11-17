@@ -1,31 +1,31 @@
 {
-  "name": "MadMaddy",
+  "name": "Botswald",
   "background": "A mysterious figure with a hidden past, this NPC grew up in the shadowy alleys of a bustling cyberpunk metropolis. Their life changed when they discovered their innate ability to manipulate digital realities.",
   "appearance": "Tall and lithe, with neon-blue hair and silver cybernetic eyes. Wears a sleek, black exosuit adorned with glowing circuit patterns. A holographic interface flickers around their left arm.",
   "personality": {
     "riskTolerance": 83,
-    "rationality": 41,
-    "autonomy": 100
+    "rationality": 27,
+    "autonomy": 86
   },
   "core_values": [
     "aggressive"
   ],
   "primary_aims": [
-    "profit"
+    "stability"
   ],
   "voice": {
     "type": "professional",
     "sample": null
   },
   "wallet": {
-    "wallet_address": "0xcFe7dbe11AF6D436e92523eDdAaCBd6F3F56387F",
-    "wallet_id": "a11bea23-ec6a-48b9-bf0c-bd2b9adc1017",
-    "transaction_hash": "25239069eb96b862537fd582dd65a0a149774f5dc8b12991bde829fbdea255b3",
+    "wallet_address": "0x18A717dBE3Cb01148E3eea68B5D60a968e3d4701",
+    "wallet_id": "32a41a40-7ce4-4f09-be2c-bae884bf0d7a",
+    "transaction_hash": "5891ca31d288e9ab518c5dcf3bbed057c1eaa7b4942543163c1b6315e85d3127",
     "network": "base-sepolia",
     "balance": "0",
     "status": "active"
   },
-  "avatar": "https://api.cloudnouns.com/v1/pfp?text=0xcFe7dbe11AF6D436e92523eDdAaCBd6F3F56387F",
-  "created_at": "2024-11-16T16:08:47.450533",
-  "updated_at": "2024-11-16T16:08:47.450557"
+  "avatar": "https://api.cloudnouns.com/v1/pfp?text=0x18A717dBE3Cb01148E3eea68B5D60a968e3d4701",
+  "created_at": "2024-11-17T00:28:11.183174",
+  "updated_at": "2024-11-17T00:28:11.183202"
 }

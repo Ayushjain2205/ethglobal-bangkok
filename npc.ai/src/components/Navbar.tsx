@@ -3,6 +3,12 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  ConnectWallet,
+  Wallet,
+  WalletDefault,
+} from "@coinbase/onchainkit/wallet";
+import { Address, Avatar, Name, Identity } from "@coinbase/onchainkit/identity";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -40,7 +46,7 @@ export default function Navbar() {
         </Link>
         <div className="hidden sm:flex items-center space-x-4">
           <Link href="/create" className="nes-btn is-primary">
-            Create Agent
+            Create NPC
           </Link>
           <Link href="/breed" className="nes-btn is-warning">
             Breed
@@ -77,6 +83,8 @@ export default function Navbar() {
           <Link href="/all" className="nes-btn block w-full">
             All NPCs
           </Link>
+
+          {/* <WalletDefault /> */}
         </div>
       )}
     </nav>
