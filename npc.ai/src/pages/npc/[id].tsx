@@ -358,6 +358,7 @@ export default function NPCDetail() {
       </Layout>
     );
   }
+  console.log(npc);
 
   return (
     <Layout>
@@ -392,6 +393,16 @@ export default function NPCDetail() {
                 <div className="flex items-center">
                   <Zap className="mr-2" size={16} />
                   <span>{npc.core_values?.length || 0} Core Values</span>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="nes-text is-error mb-2">Wallet Address</h3>
+                <div className="nes-container is-rounded is-dark p-2">
+                  <p className="break-all text-xs ">
+                    {npc.wallet?.wallet_address ||
+                      "0x0000000000000000000000000000000000000000"}
+                  </p>
                 </div>
               </div>
 
@@ -437,13 +448,6 @@ export default function NPCDetail() {
                     </span>
                   ))}
                 </div>
-              </div>
-
-              <div className="mb-6">
-                <h3 className="nes-text is-error mb-2">Wallet Address</h3>
-                <p className="break-all text-xs">
-                  {npc.wallet_address || "No wallet address"}
-                </p>
               </div>
 
               <div className="mb-6">

@@ -14,7 +14,7 @@ export interface NPC {
   balance?: number;
   nfts?: number;
   collections?: number;
-  wallet_address?: string;
+  wallet?: WalletInfo;
   core_values?: string[];
   primary_aims?: string[];
   background?: string;
